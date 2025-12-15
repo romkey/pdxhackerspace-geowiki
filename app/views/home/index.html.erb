@@ -18,16 +18,16 @@
         <li class="nav-item" role="presentation">
           <button class="nav-link active px-4" id="internal-tab" data-bs-toggle="pill" data-bs-target="#internal-panel" type="button" role="tab">
             <i class="bi bi-building"></i> Internal
-            <% if @top_internal.any? %>
-              <span class="badge bg-secondary ms-1"><%= @top_internal.count %></span>
+            <% if @internal_count.positive? %>
+              <span class="badge bg-secondary ms-1"><%= @internal_count %></span>
             <% end %>
           </button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link px-4" id="external-tab" data-bs-toggle="pill" data-bs-target="#external-panel" type="button" role="tab">
             <i class="bi bi-geo-alt"></i> External
-            <% if @top_external.any? %>
-              <span class="badge bg-secondary ms-1"><%= @top_external.count %></span>
+            <% if @external_count.positive? %>
+              <span class="badge bg-secondary ms-1"><%= @external_count %></span>
             <% end %>
           </button>
         </li>

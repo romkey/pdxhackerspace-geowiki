@@ -32,6 +32,10 @@ class HomeController < ApplicationController
       .limit(6)
       .includes(:resource_external_locations)
 
+    # Total counts for badges
+    @internal_count = Resource.visible_to(current_user).internal.count
+    @external_count = Resource.visible_to(current_user).external.count
+
     # For backwards compatibility
     @top_resources = @top_internal
   end
