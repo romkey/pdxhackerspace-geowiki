@@ -152,7 +152,7 @@
           <% loc_index = loc_form.index %>
           <div class="external-location-fields card mb-3" data-ext-index="<%= loc_index %>">
             <div class="card-body py-2">
-              <div class="row align-items-end">
+              <div class="row align-items-end mb-2">
                 <div class="col-md-2">
                   <label class="form-label small">Latitude</label>
                   <%= loc_form.number_field :latitude, class: "form-control form-control-sm ext-lat", step: "0.0000001", data: { ext_index: loc_index } %>
@@ -161,13 +161,9 @@
                   <label class="form-label small">Longitude</label>
                   <%= loc_form.number_field :longitude, class: "form-control form-control-sm ext-lng", step: "0.0000001", data: { ext_index: loc_index } %>
                 </div>
-                <div class="col-md-3">
-                  <label class="form-label small">URL (optional)</label>
-                  <%= loc_form.url_field :url, class: "form-control form-control-sm", placeholder: "https://order.example.com" %>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label small">Label (optional)</label>
-                  <%= loc_form.text_field :label, class: "form-control form-control-sm", placeholder: "Downtown location" %>
+                <div class="col-md-6">
+                  <label class="form-label small">Address <span class="text-muted">(auto-filled)</span></label>
+                  <%= loc_form.text_field :address, class: "form-control form-control-sm ext-address", placeholder: "Loading address..." %>
                 </div>
                 <div class="col-md-2">
                   <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeExtLocation('<%= loc_index %>')">
@@ -175,8 +171,18 @@
                   </button>
                   <%= loc_form.hidden_field :_destroy, class: "ext-destroy-field", value: "false", data: { ext_index: loc_index } %>
                 </div>
-          </div>
-        </div>
+              </div>
+              <div class="row">
+                <div class="col-md-5">
+                  <label class="form-label small">URL (optional)</label>
+                  <%= loc_form.url_field :url, class: "form-control form-control-sm", placeholder: "https://order.example.com" %>
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label small">Label (optional)</label>
+                  <%= loc_form.text_field :label, class: "form-control form-control-sm", placeholder: "Downtown location" %>
+                </div>
+              </div>
+            </div>
           </div>
         <% end %>
         </div>
@@ -282,6 +288,43 @@ var homeLocation = {
 var homeLocation = null;
 <% end %>
 
+// Reverse geocode coordinates to address using Nominatim
+function reverseGeocode(lat, lng, addressInput) {
+  if (!addressInput) return;
+  
+  addressInput.value = 'Loading address...';
+  addressInput.disabled = true;
+  
+  var url = 'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json';
+  
+  fetch(url, {
+    headers: {
+      'User-Agent': 'Geowiki/1.0'
+    }
+  })
+  .then(function(response) { return response.json(); })
+  .then(function(data) {
+    addressInput.disabled = false;
+    if (data && data.display_name) {
+      // Shorten the address a bit - remove country usually
+      var parts = data.display_name.split(', ');
+      if (parts.length > 4) {
+        parts = parts.slice(0, -1); // Remove country
+      }
+      addressInput.value = parts.join(', ');
+    } else {
+      addressInput.value = '';
+      addressInput.placeholder = 'Address not found';
+    }
+  })
+  .catch(function(err) {
+    console.error('Geocoding error:', err);
+    addressInput.disabled = false;
+    addressInput.value = '';
+    addressInput.placeholder = 'Could not load address';
+  });
+}
+
 // Add external location - called from button onclick
 window.addExtLocation = function(lat, lng) {
   var list = document.getElementById('external-locations-list');
@@ -291,7 +334,7 @@ window.addExtLocation = function(lat, lng) {
   var html = `
     <div class="external-location-fields card mb-3" data-ext-index="${idx}">
       <div class="card-body py-2">
-        <div class="row align-items-end">
+        <div class="row align-items-end mb-2">
           <div class="col-md-2">
             <label class="form-label small">Latitude</label>
             <input type="number" name="resource[resource_external_locations_attributes][${idx}][latitude]" 
@@ -302,20 +345,27 @@ window.addExtLocation = function(lat, lng) {
             <input type="number" name="resource[resource_external_locations_attributes][${idx}][longitude]" 
                    class="form-control form-control-sm ext-lng" step="0.0000001" value="${lng !== undefined ? lng.toFixed(7) : ''}">
           </div>
-          <div class="col-md-3">
-            <label class="form-label small">URL (optional)</label>
-            <input type="url" name="resource[resource_external_locations_attributes][${idx}][url]" 
-                   class="form-control form-control-sm" placeholder="https://order.example.com">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label small">Label (optional)</label>
-            <input type="text" name="resource[resource_external_locations_attributes][${idx}][label]" 
-                   class="form-control form-control-sm" placeholder="Downtown location">
+          <div class="col-md-6">
+            <label class="form-label small">Address <span class="text-muted">(auto-filled)</span></label>
+            <input type="text" name="resource[resource_external_locations_attributes][${idx}][address]" 
+                   class="form-control form-control-sm ext-address" placeholder="Loading address...">
           </div>
           <div class="col-md-2">
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeExtLocation('${idx}')">
               <i class="bi bi-trash"></i>
             </button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-5">
+            <label class="form-label small">URL (optional)</label>
+            <input type="url" name="resource[resource_external_locations_attributes][${idx}][url]" 
+                   class="form-control form-control-sm" placeholder="https://order.example.com">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label small">Label (optional)</label>
+            <input type="text" name="resource[resource_external_locations_attributes][${idx}][label]" 
+                   class="form-control form-control-sm" placeholder="Downtown location">
           </div>
         </div>
       </div>
@@ -327,6 +377,13 @@ window.addExtLocation = function(lat, lng) {
     msg.style.display = 'none';
   } else {
     list.insertAdjacentHTML('beforeend', html);
+  }
+  
+  // Reverse geocode if we have coordinates
+  if (lat !== undefined && lng !== undefined) {
+    var newFields = document.querySelector('.external-location-fields[data-ext-index="' + idx + '"]');
+    var addressInput = newFields ? newFields.querySelector('.ext-address') : null;
+    reverseGeocode(lat, lng, addressInput);
   }
   
   updateExtMarkers();

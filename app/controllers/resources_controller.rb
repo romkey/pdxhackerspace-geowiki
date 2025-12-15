@@ -90,7 +90,7 @@ class ResourcesController < ApplicationController
     permitted = [:name, :internal, :parent_id, :icon,
                  { resource_urls_attributes: [:id, :url, :label, :_destroy],
                    resource_locations_attributes: [:id, :map_id, :x, :y, :_destroy],
-                   resource_external_locations_attributes: [:id, :latitude, :longitude, :url, :label, :_destroy], },]
+                   resource_external_locations_attributes: [:id, :latitude, :longitude, :url, :label, :address, :_destroy] }]
 
     # Only admins can set admin_only flag
     permitted << :admin_only if current_user&.admin?
