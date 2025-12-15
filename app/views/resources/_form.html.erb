@@ -111,6 +111,7 @@
     <div class="card-body" id="resource-urls">
       <%= form.fields_for :resource_urls do |url_form| %>
         <div class="resource-url-fields mb-3">
+          <%= url_form.hidden_field :id if url_form.object.persisted? %>
           <div class="row">
             <div class="col-md-5">
               <%= url_form.label :url, "URL", class: "form-label" %>
@@ -152,6 +153,7 @@
           <% loc_index = loc_form.index %>
           <div class="external-location-fields card mb-3" data-ext-index="<%= loc_index %>">
             <div class="card-body py-2">
+              <%= loc_form.hidden_field :id if loc_form.object.persisted? %>
               <div class="row align-items-end mb-2">
                 <div class="col-md-2">
                   <label class="form-label small">Latitude</label>
@@ -221,6 +223,7 @@
       <%= form.fields_for :resource_locations do |location_form| %>
           <% location_index = location_form.index %>
           <div class="internal-location-entry d-flex align-items-center gap-2 mb-2 p-2 border rounded" data-location-index="<%= location_index %>">
+            <%= location_form.hidden_field :id if location_form.object.persisted? %>
             <span class="badge bg-danger location-number"></span>
             <%= location_form.hidden_field :map_id, class: "location-map-id", data: { location_index: location_index } %>
             <span class="location-map-name text-muted small"><%= location_form.object.map&.name %></span>
