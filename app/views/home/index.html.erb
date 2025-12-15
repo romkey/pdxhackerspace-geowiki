@@ -230,7 +230,7 @@
             // Resource markers
             var markers = [];
             <% @top_external.each_with_index do |resource, idx| %>
-              <% resource.resource_external_locations.limit(1).each do |loc| %>
+              <% resource.resource_external_locations.each do |loc| %>
               (function() {
                 var color = colors[<%= idx %>];
                 <% if resource.icon.present? %>
@@ -250,7 +250,7 @@
                 });
                 var marker = L.marker([<%= loc.latitude %>, <%= loc.longitude %>], { icon: icon })
                   .addTo(map)
-                  .bindPopup('<strong><%= j(resource.name) %></strong><br><small><%= pluralize(resource.view_count, 'view') %></small>');
+                  .bindPopup('<strong><%= j(resource.name) %></strong><br><small><%= loc.label.presence || resource.name %></small>');
                 markers.push(marker);
               })();
               <% end %>

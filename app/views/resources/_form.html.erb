@@ -417,7 +417,8 @@ function initOsmMap() {
   var centerLat = homeLocation ? homeLocation.lat : 45.5155;
   var centerLng = homeLocation ? homeLocation.lng : -122.6793;
   
-  osmMap = L.map('osm-map-picker').setView([centerLat, centerLng], 11);
+  // Zoom 16 = street level, shows a few blocks around the center
+  osmMap = L.map('osm-map-picker').setView([centerLat, centerLng], 16);
   
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
