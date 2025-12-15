@@ -167,6 +167,14 @@
               </li>
             <% end %>
           </ul>
+          <%= form_with url: search_path, method: :get, class: "d-flex me-3", local: true do %>
+            <div class="input-group">
+              <input type="search" name="q" class="form-control form-control-sm" placeholder="Search..." value="<%= params[:q] %>" aria-label="Search">
+              <button class="btn btn-outline-light btn-sm" type="submit">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          <% end %>
           <ul class="navbar-nav">
             <% if current_user %>
               <li class="nav-item dropdown">

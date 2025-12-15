@@ -38,6 +38,9 @@ Rails.application.routes.draw do
   # Activity Journal (admin only)
   get "journal", to: "journal#index", as: :journal
 
+  # Search
+  get "search", to: "search#index", as: :search
+
   # Defines the root path route ("/")
   root "home#index"
 end

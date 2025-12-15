@@ -1,0 +1,199 @@
+<div class="container mt-4">
+  <h1 class="mb-4">
+    <i class="bi bi-search"></i> Search Results
+    <% if @query.present? %>
+      <small class="text-muted">for "<%= @query %>"</small>
+    <% end %>
+  </h1>
+
+  <% if @query.blank? %>
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i> Enter a search term to find resources and maps.
+    </div>
+  <% elsif @total_count == 0 %>
+    <div class="alert alert-warning">
+      <i class="bi bi-exclamation-triangle"></i> No results found for "<%= @query %>".
+    </div>
+  <% else %>
+    <p class="text-muted mb-4">Found <%= @total_count %> result<%= @total_count == 1 ? '' : 's' %></p>
+
+    <!-- Nav Pills -->
+    <ul class="nav nav-pills mb-4" id="searchTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="internal-tab" data-bs-toggle="pill" data-bs-target="#internal" type="button" role="tab">
+          <i class="bi bi-building"></i> Internal Resources
+          <span class="badge bg-secondary"><%= @internal_resources.count %></span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="external-tab" data-bs-toggle="pill" data-bs-target="#external" type="button" role="tab">
+          <i class="bi bi-geo-alt"></i> External Resources
+          <span class="badge bg-secondary"><%= @external_resources.count %></span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="maps-tab" data-bs-toggle="pill" data-bs-target="#maps" type="button" role="tab">
+          <i class="bi bi-map"></i> Maps
+          <span class="badge bg-secondary"><%= @maps.count %></span>
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="searchTabContent">
+      <!-- Internal Resources Tab -->
+      <div class="tab-pane fade show active" id="internal" role="tabpanel">
+        <% if @internal_resources.any? %>
+          <div class="list-group">
+            <% @internal_resources.each do |resource| %>
+              <%= link_to resource_path(resource), class: "list-group-item list-group-item-action" do %>
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                  <div>
+                    <h5 class="mb-1">
+                      <% if resource.icon.present? %>
+                        <% if resource.icon.start_with?('bi-') %>
+                          <i class="bi <%= resource.icon %> me-1"></i>
+                        <% else %>
+                          <span class="me-1"><%= resource.icon %></span>
+                        <% end %>
+                      <% end %>
+                      <%= resource.name %>
+                      <% if resource.admin_only? %>
+                        <span class="badge bg-warning text-dark" title="Admin Only"><i class="bi bi-lock"></i></span>
+                      <% end %>
+                    </h5>
+                    <% if resource.description.present? %>
+                      <p class="mb-1 text-muted"><%= truncate(resource.description, length: 150) %></p>
+                    <% end %>
+                  </div>
+                  <div class="text-end">
+                    <small class="text-muted">
+                      <i class="bi bi-pin-map"></i> <%= resource.resource_locations.count %> location<%= resource.resource_locations.count == 1 ? '' : 's' %>
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                      <i class="bi bi-eye"></i> <%= resource.view_count %> views
+                    </small>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="alert alert-secondary">
+            <i class="bi bi-info-circle"></i> No internal resources found.
+          </div>
+        <% end %>
+      </div>
+
+      <!-- External Resources Tab -->
+      <div class="tab-pane fade" id="external" role="tabpanel">
+        <% if @external_resources.any? %>
+          <div class="list-group">
+            <% @external_resources.each do |resource| %>
+              <%= link_to resource_path(resource), class: "list-group-item list-group-item-action" do %>
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                  <div>
+                    <h5 class="mb-1">
+                      <% if resource.icon.present? %>
+                        <% if resource.icon.start_with?('bi-') %>
+                          <i class="bi <%= resource.icon %> me-1"></i>
+                        <% else %>
+                          <span class="me-1"><%= resource.icon %></span>
+                        <% end %>
+                      <% end %>
+                      <%= resource.name %>
+                      <% if resource.admin_only? %>
+                        <span class="badge bg-warning text-dark" title="Admin Only"><i class="bi bi-lock"></i></span>
+                      <% end %>
+                    </h5>
+                    <% if resource.description.present? %>
+                      <p class="mb-1 text-muted"><%= truncate(resource.description, length: 150) %></p>
+                    <% end %>
+                  </div>
+                  <div class="text-end">
+                    <small class="text-muted">
+                      <i class="bi bi-geo-alt"></i> <%= resource.resource_external_locations.count %> location<%= resource.resource_external_locations.count == 1 ? '' : 's' %>
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                      <i class="bi bi-eye"></i> <%= resource.view_count %> views
+                    </small>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="alert alert-secondary">
+            <i class="bi bi-info-circle"></i> No external resources found.
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Maps Tab -->
+      <div class="tab-pane fade" id="maps" role="tabpanel">
+        <% if @maps.any? %>
+          <div class="list-group">
+            <% @maps.each do |map| %>
+              <%= link_to map_path(map), class: "list-group-item list-group-item-action" do %>
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <% if map.image.attached? %>
+                      <%= image_tag map.image.variant(resize_to_limit: [80, 80]), class: "me-3 rounded", style: "width: 60px; height: 60px; object-fit: cover;" %>
+                    <% else %>
+                      <div class="me-3 rounded bg-secondary d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-map text-light"></i>
+                      </div>
+                    <% end %>
+                    <div>
+                      <h5 class="mb-1">
+                        <%= map.name %>
+                        <% if map.is_default %>
+                          <span class="badge bg-primary">Default</span>
+                        <% end %>
+                      </h5>
+                      <% if map.parent %>
+                        <small class="text-muted">
+                          <i class="bi bi-diagram-3"></i> Parent: <%= map.parent.name %>
+                        </small>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    <small class="text-muted">
+                      <i class="bi bi-box"></i> <%= map.resources.count %> resource<%= map.resources.count == 1 ? '' : 's' %>
+                    </small>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="alert alert-secondary">
+            <i class="bi bi-info-circle"></i> No maps found.
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  // Auto-select first tab with results
+  document.addEventListener('DOMContentLoaded', function() {
+    const internalCount = <%= @internal_resources.count %>;
+    const externalCount = <%= @external_resources.count %>;
+    const mapsCount = <%= @maps.count %>;
+    
+    // If internal has no results but another tab does, switch to it
+    if (internalCount === 0) {
+      if (externalCount > 0) {
+        document.getElementById('external-tab').click();
+      } else if (mapsCount > 0) {
+        document.getElementById('maps-tab').click();
+      }
+    }
+  });
+</script>
+
