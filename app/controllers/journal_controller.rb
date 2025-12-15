@@ -5,8 +5,7 @@ class JournalController < ApplicationController
 
   def index
     @entries = JournalEntry.includes(:user, :journable)
-                           .recent
-                           .limit(100)
+      .recent
+      .limit(100)
   end
 end
-

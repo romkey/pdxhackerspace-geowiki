@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MapsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:index, :show, :image_url]
   before_action :set_map, only: [:show, :edit, :update, :destroy]
@@ -9,13 +11,14 @@ class MapsController < ApplicationController
     @root_maps = @maps.where(parent: nil)
   end
 
-  def show
-  end
+  def show; end
 
   def new
     @map = Map.new
     @map.parent_id = params[:parent_id] if params[:parent_id]
   end
+
+  def edit; end
 
   def create
     @map = Map.new(map_params)
@@ -23,18 +26,15 @@ class MapsController < ApplicationController
     if @map.save
       redirect_to @map, notice: "Map was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
-  end
-
-  def edit
   end
 
   def update
     if @map.update(map_params)
       redirect_to @map, notice: "Map was successfully updated."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -59,17 +59,16 @@ class MapsController < ApplicationController
   end
 
   def authorize_edit!
-    unless @map.can_edit?(current_user)
-      redirect_to @map, alert: "You are not authorized to edit this map."
-    end
+    return if @map.can_edit?(current_user)
+
+    redirect_to @map, alert: "You are not authorized to edit this map."
   end
 
   def map_params
-    params.require(:map).permit(:name, :slack_channel, :parent_id, :image, :is_default, maintainer_ids: [])
+    params.expect(map: [:name, :slack_channel, :parent_id, :image, :is_default, { maintainer_ids: [] }])
   end
 
   def set_journable_user
     Map.current_user = current_user
   end
 end
-

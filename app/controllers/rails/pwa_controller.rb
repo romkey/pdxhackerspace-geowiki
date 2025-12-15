@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rails
   class PwaController < ActionController::Base
     def service_worker
@@ -9,4 +11,3 @@ module Rails
     end
   end
 end
-

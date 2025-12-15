@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SessionsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:new, :create, :omniauth, :failure]
 
@@ -9,48 +11,16 @@ class SessionsController < ApplicationController
     email = params[:email]
     password = params[:password]
 
-    # Local admin login (environment variable based)
-    if ENV["LOCAL_ADMIN_EMAIL"].present? && ENV["LOCAL_ADMIN_PASSWORD"].present?
-      if email == ENV["LOCAL_ADMIN_EMAIL"] && password == ENV["LOCAL_ADMIN_PASSWORD"]
-        user = User.find_or_initialize_by(email: email)
-        user.name = ENV["LOCAL_ADMIN_NAME"].presence || "Local Admin"
-        user.is_admin = true
-        user.password = password
-        user.provider = nil
-        user.uid = nil
-        user.save!
+    user = authenticate_local_admin(email, password) ||
+           authenticate_local_user(email, password) ||
+           authenticate_database_user(email, password)
 
-        session[:user_id] = user.id
-        redirect_to root_path, notice: "Logged in as admin."
-        return
-      end
-    end
-
-    # Local user login (environment variable based, non-admin)
-    if ENV["LOCAL_USER_EMAIL"].present? && ENV["LOCAL_USER_PASSWORD"].present?
-      if email == ENV["LOCAL_USER_EMAIL"] && password == ENV["LOCAL_USER_PASSWORD"]
-        user = User.find_or_initialize_by(email: email)
-        user.name = ENV["LOCAL_USER_NAME"].presence || "Local User"
-        user.is_admin = false
-        user.password = password
-        user.provider = nil
-        user.uid = nil
-        user.save!
-
-        session[:user_id] = user.id
-        redirect_to root_path, notice: "Logged in successfully."
-        return
-      end
-    end
-
-    # Regular database user login (if password is set)
-    user = User.find_by(email: email)
-    if user&.authenticate(password)
+    if user
       session[:user_id] = user.id
-      redirect_to root_path, notice: "Logged in successfully."
+      redirect_to root_path, notice: login_notice_for(user)
     else
       flash.now[:alert] = "Invalid email or password."
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -72,5 +42,64 @@ class SessionsController < ApplicationController
     session[:user_id] = nil
     redirect_to root_path, notice: "Logged out successfully."
   end
-end
 
+  private
+
+  def authenticate_local_admin(email, password)
+    return nil unless local_admin_credentials_match?(email, password)
+
+    find_or_create_local_user(
+      email: email,
+      name: ENV.fetch("LOCAL_ADMIN_NAME", "Local Admin"),
+      password: password,
+      is_admin: true
+    )
+  end
+
+  def authenticate_local_user(email, password)
+    return nil unless local_user_credentials_match?(email, password)
+
+    find_or_create_local_user(
+      email: email,
+      name: ENV.fetch("LOCAL_USER_NAME", "Local User"),
+      password: password,
+      is_admin: false
+    )
+  end
+
+  def authenticate_database_user(email, password)
+    user = User.find_by(email: email)
+    user if user&.authenticate(password)
+  end
+
+  def local_admin_credentials_match?(email, password)
+    admin_email = ENV.fetch("LOCAL_ADMIN_EMAIL", nil)
+    admin_password = ENV.fetch("LOCAL_ADMIN_PASSWORD", nil)
+
+    admin_email.present? && admin_password.present? &&
+      email == admin_email && password == admin_password
+  end
+
+  def local_user_credentials_match?(email, password)
+    user_email = ENV.fetch("LOCAL_USER_EMAIL", nil)
+    user_password = ENV.fetch("LOCAL_USER_PASSWORD", nil)
+
+    user_email.present? && user_password.present? &&
+      email == user_email && password == user_password
+  end
+
+  def find_or_create_local_user(email:, name:, password:, is_admin:)
+    user = User.find_or_initialize_by(email: email)
+    user.name = name
+    user.is_admin = is_admin
+    user.password = password
+    user.provider = nil
+    user.uid = nil
+    user.save!
+    user
+  end
+
+  def login_notice_for(user)
+    user.admin? ? "Logged in as admin." : "Logged in successfully."
+  end
+end

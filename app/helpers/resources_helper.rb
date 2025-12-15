@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ResourcesHelper
   def resource_type_badge(resource)
     if resource.internal?
@@ -9,7 +11,7 @@ module ResourcesHelper
 
   def format_coordinates(latitude, longitude)
     return nil unless latitude && longitude
+
     "#{latitude}, #{longitude}"
   end
 end
-

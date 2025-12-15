@@ -21,6 +21,64 @@
       </div>
 
       <div class="mb-3">
+        <%= form.label :icon, class: "form-label" %>
+        <div class="input-group">
+          <span class="input-group-text" id="icon-preview" style="min-width: 50px; justify-content: center;">
+            <% if resource.icon.present? %>
+              <% if resource.icon.start_with?('bi-') %>
+                <i class="bi <%= resource.icon %>" style="font-size: 1.25rem;"></i>
+              <% else %>
+                <span style="font-size: 1.25rem;"><%= resource.icon %></span>
+              <% end %>
+            <% else %>
+              <i class="bi bi-question-circle text-muted"></i>
+            <% end %>
+          </span>
+          <%= form.text_field :icon, class: "form-control", placeholder: "bi-heart-pulse or 🏥", id: "resource_icon" %>
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Common Icons
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="max-height: 300px; overflow-y: auto;">
+            <li><h6 class="dropdown-header">Safety & Medical</h6></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-heart-pulse"><i class="bi bi-heart-pulse me-2"></i> First Aid</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-hospital"><i class="bi bi-hospital me-2"></i> Medical</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-bandaid"><i class="bi bi-bandaid me-2"></i> Bandage</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-shield-check"><i class="bi bi-shield-check me-2"></i> Safety</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-fire"><i class="bi bi-fire me-2"></i> Fire</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-exclamation-triangle"><i class="bi bi-exclamation-triangle me-2"></i> Warning</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">Facilities</h6></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-door-open"><i class="bi bi-door-open me-2"></i> Door/Exit</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-droplet"><i class="bi bi-droplet me-2"></i> Restroom</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-cup-hot"><i class="bi bi-cup-hot me-2"></i> Kitchen/Coffee</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-lightning"><i class="bi bi-lightning me-2"></i> Power</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-wifi"><i class="bi bi-wifi me-2"></i> WiFi</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-printer"><i class="bi bi-printer me-2"></i> Printer</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-pc-display"><i class="bi bi-pc-display me-2"></i> Computer</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">Tools & Equipment</h6></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-tools"><i class="bi bi-tools me-2"></i> Tools</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-wrench"><i class="bi bi-wrench me-2"></i> Wrench</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-hammer"><i class="bi bi-hammer me-2"></i> Hammer</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-box-seam"><i class="bi bi-box-seam me-2"></i> Storage</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-gear"><i class="bi bi-gear me-2"></i> Equipment</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">Common Emojis</h6></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="🏥">🏥 Hospital</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="🚽">🚽 Toilet</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="🔧">🔧 Wrench</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="⚡">⚡ Electric</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="🔥">🔥 Fire</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="📦">📦 Box</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="🎯">🎯 Target</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon=""><i class="bi bi-x-circle me-2 text-muted"></i> Clear Icon</a></li>
+          </ul>
+        </div>
+        <div class="form-text">Choose a Bootstrap Icon (bi-*) or enter an emoji. <a href="https://icons.getbootstrap.com/" target="_blank">Browse all icons</a></div>
+      </div>
+
+      <div class="mb-3">
         <div class="form-check form-switch">
           <%= form.check_box :internal, class: "form-check-input", id: "resource_internal" %>
           <%= form.label :internal, "Internal Resource", class: "form-check-label" %>
@@ -623,11 +681,45 @@ function initForm() {
   updateExtNoLocMsg();
 }
 
+// Icon picker functionality
+function initIconPicker() {
+  var iconInput = document.getElementById('resource_icon');
+  var iconPreview = document.getElementById('icon-preview');
+  
+  if (!iconInput || !iconPreview) return;
+  
+  // Update preview when input changes
+  iconInput.addEventListener('input', function() {
+    updateIconPreview(this.value);
+  });
+  
+  // Handle dropdown selections
+  document.querySelectorAll('.icon-choice').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      var icon = this.dataset.icon;
+      iconInput.value = icon;
+      updateIconPreview(icon);
+    });
+  });
+  
+  function updateIconPreview(icon) {
+    if (!icon) {
+      iconPreview.innerHTML = '<i class="bi bi-question-circle text-muted"></i>';
+    } else if (icon.startsWith('bi-')) {
+      iconPreview.innerHTML = '<i class="bi ' + icon + '" style="font-size: 1.25rem;"></i>';
+    } else {
+      iconPreview.innerHTML = '<span style="font-size: 1.25rem;">' + icon + '</span>';
+    }
+  }
+}
+
 // Run on load
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initForm);
+  document.addEventListener('DOMContentLoaded', function() { initForm(); initIconPicker(); });
 } else {
   initForm();
+  initIconPicker();
 }
-document.addEventListener('turbo:load', initForm);
+document.addEventListener('turbo:load', function() { initForm(); initIconPicker(); });
 </script>

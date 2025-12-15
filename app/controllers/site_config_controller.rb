@@ -8,14 +8,13 @@ class SiteConfigController < ApplicationController
     redirect_to edit_site_config_path
   end
 
-  def edit
-  end
+  def edit; end
 
   def update
     if @site_config.update(site_config_params)
       redirect_to edit_site_config_path, notice: "Site configuration updated successfully."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -26,7 +25,6 @@ class SiteConfigController < ApplicationController
   end
 
   def site_config_params
-    params.require(:site_config).permit(:organization_name, :address, :latitude, :longitude)
+    params.expect(site_config: [:organization_name, :address, :latitude, :longitude])
   end
 end
-

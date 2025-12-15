@@ -1,0 +1,111 @@
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'bin/**/*'
+    - 'db/schema.rb'
+    - 'db/migrate/**/*'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'storage/**/*'
+
+# Layout
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'config/**/*'
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+# Metrics
+Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - 'db/seeds.rb'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'config/**/*'
+    - 'spec/**/*'
+    - 'lib/tasks/**/*'
+    - 'app/views/**/*.builder'
+
+Metrics/AbcSize:
+  Max: 25
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/CyclomaticComplexity:
+  Max: 15
+
+Metrics/PerceivedComplexity:
+  Max: 15
+
+# Style
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+  Exclude:
+    - 'config/**/*'
+    - 'db/**/*'
+    - 'Gemfile'
+    - 'Rakefile'
+    - 'app/views/**/*.builder'
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+Style/WordArray:
+  EnforcedStyle: brackets
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+# Naming
+Naming/PredicatePrefix:
+  Enabled: false
+
+# Rails
+Rails/SkipsModelValidations:
+  Exclude:
+    - 'app/controllers/resources_controller.rb'
+    - 'app/models/map.rb'
+
+Rails/OutputSafety:
+  Exclude:
+    - 'app/views/**/*'
+
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Rails/ApplicationController:
+  Exclude:
+    - 'app/controllers/rails/**/*'
+
+# RSpec
+RSpec/ExampleLength:
+  Max: 20
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/NestedGroups:
+  Max: 4

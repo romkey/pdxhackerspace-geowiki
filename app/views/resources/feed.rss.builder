@@ -17,7 +17,7 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom" do
 
         description = []
         description << (resource.internal? ? "Internal resource" : "External resource")
-        
+
         if resource.internal? && resource.resource_locations.any?
           maps = resource.resource_locations.map { |loc| loc.map.name }.uniq
           description << "Located on: #{maps.join(', ')}"
@@ -25,17 +25,12 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom" do
           description << "#{resource.resource_external_locations.count} geographic location(s)"
         end
 
-        if resource.resource_urls.any?
-          description << "#{resource.resource_urls.count} source URL(s)"
-        end
+        description << "#{resource.resource_urls.count} source URL(s)" if resource.resource_urls.any?
 
-        if resource.parent
-          description << "Child of: #{resource.parent.name}"
-        end
+        description << "Child of: #{resource.parent.name}" if resource.parent
 
         xml.description description.join(" • ")
       end
     end
   end
 end
-

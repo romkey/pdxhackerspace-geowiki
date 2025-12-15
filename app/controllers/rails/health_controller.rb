@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Rails
   class HealthController < ActionController::Base
     def show
@@ -5,4 +7,3 @@ module Rails
     end
   end
 end
-

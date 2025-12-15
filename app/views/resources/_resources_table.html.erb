@@ -63,6 +63,13 @@
               <% if is_child %>
                 <span class="text-muted ms-3 me-1"><i class="bi bi-arrow-return-right"></i></span>
               <% end %>
+              <% if resource.icon.present? %>
+                <% if resource.icon.start_with?('bi-') %>
+                  <i class="bi <%= resource.icon %> me-1"></i>
+                <% else %>
+                  <span class="me-1"><%= resource.icon %></span>
+                <% end %>
+              <% end %>
               <%= link_to resource.name, resource, class: (is_child ? '' : 'fw-semibold') %>
               <% if resource.admin_only? %>
                 <span class="badge bg-warning text-dark" title="Admin only">

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ApplicationRecord
   has_secure_password validations: false
 
@@ -12,7 +14,7 @@ class User < ApplicationRecord
     user = where(provider: auth.provider, uid: auth.uid).first_or_initialize
     user.email = auth.info.email
     user.name = auth.info.name || auth.info.email
-    user.is_admin = auth.extra.raw_info["is_admin"] == true || auth.extra.raw_info["is_admin"] == "true"
+    user.is_admin = [true, "true"].include?(auth.extra.raw_info["is_admin"])
     user
   end
 
@@ -20,4 +22,3 @@ class User < ApplicationRecord
     is_admin
   end
 end
-

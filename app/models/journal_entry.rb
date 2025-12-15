@@ -49,4 +49,3 @@ class JournalEntry < ApplicationRecord
     journable&.name || details || "Unknown"
   end
 end
-

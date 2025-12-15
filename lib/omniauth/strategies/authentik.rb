@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "omniauth/strategies/oauth2"
 
 module OmniAuth
@@ -9,7 +11,7 @@ module OmniAuth
         site: nil,
         authorize_url: "/application/o/authorize/",
         token_url: "/application/o/token/",
-        userinfo_url: "/application/o/userinfo/"
+        userinfo_url: "/application/o/userinfo/",
       }
 
       uid { raw_info["sub"] || raw_info["email"] }
@@ -18,13 +20,13 @@ module OmniAuth
         {
           name: raw_info["name"] || raw_info["email"],
           email: raw_info["email"],
-          nickname: raw_info["preferred_username"] || raw_info["email"]
+          nickname: raw_info["preferred_username"] || raw_info["email"],
         }
       end
 
       extra do
         {
-          raw_info: raw_info
+          raw_info: raw_info,
         }
       end
 
@@ -47,4 +49,3 @@ module OmniAuth
     end
   end
 end
-

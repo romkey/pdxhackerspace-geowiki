@@ -58,6 +58,17 @@ services:
       DATABASE_PASSWORD: postgres
       RAILS_ENV: test
 
+  rubocop:
+    build: .
+    command: bundle exec rubocop
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    environment:
+      RAILS_ENV: development
+    profiles:
+      - lint
+
 volumes:
   postgres_data:
   bundle_cache:

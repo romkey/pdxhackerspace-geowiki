@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 class Resource < ApplicationRecord
   include Journable
 
-  belongs_to :parent, class_name: "Resource", optional: true
-  has_many :children, class_name: "Resource", foreign_key: "parent_id", dependent: :nullify
+  belongs_to :parent, class_name: "Resource", optional: true, inverse_of: :children
+  has_many :children, class_name: "Resource", foreign_key: "parent_id", dependent: :nullify, inverse_of: :parent
 
   has_many :resource_urls, dependent: :destroy
   has_many :resource_locations, dependent: :destroy

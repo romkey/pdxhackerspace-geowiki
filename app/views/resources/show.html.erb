@@ -24,6 +24,13 @@
         </nav>
       <% end %>
       <h1 class="mb-1">
+        <% if @resource.icon.present? %>
+          <% if @resource.icon.start_with?('bi-') %>
+            <i class="bi <%= @resource.icon %> me-2"></i>
+          <% else %>
+            <span class="me-2"><%= @resource.icon %></span>
+          <% end %>
+        <% end %>
         <%= @resource.name %>
         <% if @resource.admin_only? %>
           <span class="badge bg-warning text-dark fs-6"><i class="bi bi-shield-lock"></i> Admin Only</span>

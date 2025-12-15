@@ -54,7 +54,16 @@
                           <%= idx + 1 %>
                         </span>
                         <div class="flex-grow-1 min-width-0">
-                          <div class="text-white fw-medium text-truncate" style="font-size: 0.9rem;"><%= resource.name %></div>
+                          <div class="text-white fw-medium text-truncate" style="font-size: 0.9rem;">
+                            <% if resource.icon.present? %>
+                              <% if resource.icon.start_with?('bi-') %>
+                                <i class="bi <%= resource.icon %> me-1"></i>
+                              <% else %>
+                                <span class="me-1"><%= resource.icon %></span>
+                              <% end %>
+                            <% end %>
+                            <%= resource.name %>
+                          </div>
                           <small class="text-secondary"><%= pluralize(resource.view_count, 'view') %></small>
                         </div>
                       </div>
@@ -141,7 +150,16 @@
                         <%= idx + 1 %>
                       </span>
                       <div class="flex-grow-1 min-width-0">
-                        <div class="text-white fw-medium text-truncate" style="font-size: 0.9rem;"><%= resource.name %></div>
+                        <div class="text-white fw-medium text-truncate" style="font-size: 0.9rem;">
+                          <% if resource.icon.present? %>
+                            <% if resource.icon.start_with?('bi-') %>
+                              <i class="bi <%= resource.icon %> me-1"></i>
+                            <% else %>
+                              <span class="me-1"><%= resource.icon %></span>
+                            <% end %>
+                          <% end %>
+                          <%= resource.name %>
+                        </div>
                         <small class="text-secondary"><%= pluralize(resource.view_count, 'view') %></small>
                       </div>
                     </div>
