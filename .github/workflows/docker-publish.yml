@@ -7,6 +7,11 @@ on:
   # Allow manual trigger
   workflow_dispatch:
 
+# Prevent duplicate runs - cancel in-progress runs for same ref
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
