@@ -7,9 +7,9 @@ class SearchController < ApplicationController
     @query = params[:q].to_s.strip
 
     if @query.present?
-      # Search resources (respecting admin_only visibility)
+      # Search resources by name or description (respecting admin_only visibility)
       resources = Resource.visible_to(current_user)
-        .where("name ILIKE ?", "%#{@query}%")
+        .where("name ILIKE ? OR description ILIKE ?", "%#{@query}%", "%#{@query}%")
         .includes(:resource_locations, :resource_external_locations)
         .order(:name)
 

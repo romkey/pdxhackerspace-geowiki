@@ -21,6 +21,12 @@
       </div>
 
       <div class="mb-3">
+        <%= form.label :description, class: "form-label" %>
+        <%= form.text_area :description, class: "form-control", rows: 2, placeholder: "Optional notes like 'above the toilet' or 'get the kung pao chicken'" %>
+        <div class="form-text">Add helpful details about finding or using this resource.</div>
+      </div>
+
+      <div class="mb-3">
         <%= form.label :icon, class: "form-label" %>
         <div class="input-group">
           <span class="input-group-text" id="icon-preview" style="min-width: 50px; justify-content: center;">
@@ -174,7 +180,7 @@
                   <%= loc_form.hidden_field :_destroy, class: "ext-destroy-field", value: "false", data: { ext_index: loc_index } %>
                 </div>
               </div>
-              <div class="row">
+      <div class="row">
                 <div class="col-md-5">
                   <label class="form-label small">URL (optional)</label>
                   <%= loc_form.url_field :url, class: "form-control form-control-sm", placeholder: "https://order.example.com" %>
@@ -183,8 +189,8 @@
                   <label class="form-label small">Label (optional)</label>
                   <%= loc_form.text_field :label, class: "form-control form-control-sm", placeholder: "Downtown location" %>
                 </div>
-              </div>
-            </div>
+          </div>
+        </div>
           </div>
         <% end %>
         </div>

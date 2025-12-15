@@ -38,6 +38,9 @@
           <span class="badge bg-warning text-dark fs-6"><i class="bi bi-shield-lock"></i> Admin Only</span>
         <% end %>
       </h1>
+      <% if @resource.description.present? %>
+        <p class="text-muted mb-2"><i class="bi bi-info-circle"></i> <%= @resource.description %></p>
+      <% end %>
       <small class="text-muted">
         <i class="bi bi-eye"></i> <%= pluralize(@resource.view_count, 'view') %>
         <span class="ms-2"><i class="bi bi-clock"></i> Updated <%= time_ago_in_words(@resource.updated_at) %> ago</span>

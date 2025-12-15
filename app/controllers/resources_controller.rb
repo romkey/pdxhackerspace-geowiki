@@ -87,7 +87,7 @@ class ResourcesController < ApplicationController
   end
 
   def resource_params
-    permitted = [:name, :internal, :parent_id, :icon,
+    permitted = [:name, :description, :internal, :parent_id, :icon,
                  { resource_urls_attributes: [:id, :url, :label, :_destroy],
                    resource_locations_attributes: [:id, :map_id, :x, :y, :_destroy],
                    resource_external_locations_attributes: [:id, :latitude, :longitude, :url, :label, :address, :_destroy] }]
