@@ -100,6 +100,11 @@ Rails/ApplicationController:
   Exclude:
     - 'app/controllers/rails/**/*'
 
+# params.expect doesn't handle dynamic indices from JavaScript nested attributes
+Rails/StrongParametersExpect:
+  Exclude:
+    - 'app/controllers/resources_controller.rb'
+
 # RSpec
 RSpec/ExampleLength:
   Max: 20

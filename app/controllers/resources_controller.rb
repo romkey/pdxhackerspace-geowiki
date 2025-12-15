@@ -96,7 +96,7 @@ class ResourcesController < ApplicationController
     # Only admins can set admin_only flag
     permitted << :admin_only if current_user&.admin?
 
-    params.expect(resource: [*permitted])
+    params.require(:resource).permit(*permitted)
   end
 
   def set_journable_user

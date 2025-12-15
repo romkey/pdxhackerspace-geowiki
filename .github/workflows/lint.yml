@@ -1,9 +1,6 @@
 name: Lint
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -24,4 +21,3 @@ jobs:
 
       - name: Run Rubocop
         run: bundle exec rubocop --parallel
-

@@ -92,7 +92,15 @@
                         title: "#{resource.name} (#{resource.view_count} views)" do %>
                       <div class="d-flex align-items-center justify-content-center"
                            style="width: 32px; height: 32px; background: <%= color[:bg] %>; border: 3px solid white; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.4); color: <%= color[:text] %>; font-weight: bold; font-size: 14px;">
-                        <%= idx + 1 %>
+                        <% if resource.icon.present? %>
+                          <% if resource.icon.start_with?('bi-') %>
+                            <i class="bi <%= resource.icon %>"></i>
+                          <% else %>
+                            <%= resource.icon %>
+                          <% end %>
+                        <% else %>
+                          <%= idx + 1 %>
+                        <% end %>
                       </div>
                     <% end %>
                   <% end %>
@@ -225,9 +233,18 @@
               <% resource.resource_external_locations.limit(1).each do |loc| %>
               (function() {
                 var color = colors[<%= idx %>];
+                <% if resource.icon.present? %>
+                  <% if resource.icon.start_with?('bi-') %>
+                var iconContent = '<i class="bi <%= resource.icon %>"></i>';
+                  <% else %>
+                var iconContent = '<%= j(resource.icon) %>';
+                  <% end %>
+                <% else %>
+                var iconContent = '<%= idx + 1 %>';
+                <% end %>
                 var icon = L.divIcon({
                   className: 'resource-marker',
-                  html: '<div style="background: ' + color + '; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;"><%= idx + 1 %></div>',
+                  html: '<div style="background: ' + color + '; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">' + iconContent + '</div>',
                   iconSize: [28, 28],
                   iconAnchor: [14, 14]
                 });
