@@ -36,23 +36,28 @@ class Resource < ApplicationRecord
   end
 
   # Get all resources in this hierarchy (self + all descendants)
-  def self_and_descendants
-    [self] + descendants
+  def self_and_descendants(user = nil)
+    [self] + descendants(user)
   end
 
   # Get all descendant resources recursively
-  def descendants
-    children.flat_map(&:self_and_descendants)
+  def descendants(user = nil)
+    visible_children(user).flat_map { |c| c.self_and_descendants(user) }
+  end
+
+  # Get children visible to the given user
+  def visible_children(user = nil)
+    user&.admin? ? children : children.public_only
   end
 
   # Get all internal map locations including from children (recursive)
-  def all_resource_locations
-    self_and_descendants.flat_map(&:resource_locations)
+  def all_resource_locations(user = nil)
+    self_and_descendants(user).flat_map(&:resource_locations)
   end
 
   # Get all external locations including from children (recursive)
-  def all_external_locations
-    self_and_descendants.flat_map(&:resource_external_locations)
+  def all_external_locations(user = nil)
+    self_and_descendants(user).flat_map(&:resource_external_locations)
   end
 
   # Get breadcrumb trail from root to this resource
