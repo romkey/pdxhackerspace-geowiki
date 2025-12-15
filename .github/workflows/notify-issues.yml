@@ -1,0 +1,33 @@
+name: Notify on Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: vars.NOTIFY_EMAIL != ''
+    
+    steps:
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "[Geowiki] New Issue: ${{ github.event.issue.title }}"
+          to: ${{ vars.NOTIFY_EMAIL }}
+          from: Geowiki Notifications <${{ secrets.MAIL_USERNAME }}>
+          body: |
+            A new issue has been opened in Geowiki:
+            
+            Title: ${{ github.event.issue.title }}
+            Author: ${{ github.event.issue.user.login }}
+            
+            ${{ github.event.issue.body }}
+            
+            ---
+            View issue: ${{ github.event.issue.html_url }}
+
