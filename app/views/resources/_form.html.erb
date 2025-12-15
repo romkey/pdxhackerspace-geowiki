@@ -88,7 +88,7 @@
 
       <div class="mb-3">
         <%= form.label :parent_id, "Parent Resource", class: "form-label" %>
-        <%= form.collection_select :parent_id, Resource.where.not(id: resource.id).order(:name), :id, :name, { include_blank: "(No parent - top level resource)" }, class: "form-select" %>
+        <%= form.collection_select :parent_id, Resource.visible_to(current_user).where.not(id: resource.id).order(:name), :id, :name, { include_blank: "(No parent - top level resource)" }, class: "form-select" %>
         <div class="form-text">If this resource is a child of another resource (e.g., a specific restroom is a child of "Restrooms"), select the parent here. Viewing the parent will show all child locations.</div>
       </div>
 
