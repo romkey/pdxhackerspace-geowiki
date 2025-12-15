@@ -1,0 +1,411 @@
+<%
+  marker_colors = ['#e74c3c', '#f39c12', '#27ae60', '#3498db', '#9b59b6', '#1abc9c', '#e67e22', '#2ecc71']
+  
+  # Get all locations including from children (recursive)
+  all_internal_locations = @resource.all_resource_locations
+  all_external_locations = @resource.all_external_locations
+  has_children = @resource.children.any?
+  
+  # Get site config for home location marker
+  site_config = SiteConfig.instance
+%>
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <% if @resource.parent %>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1">
+            <% @resource.ancestors.each do |ancestor| %>
+              <li class="breadcrumb-item"><%= link_to ancestor.name, ancestor %></li>
+            <% end %>
+            <li class="breadcrumb-item active"><%= @resource.name %></li>
+          </ol>
+        </nav>
+      <% end %>
+      <h1 class="mb-1">
+        <%= @resource.name %>
+        <% if @resource.admin_only? %>
+          <span class="badge bg-warning text-dark fs-6"><i class="bi bi-shield-lock"></i> Admin Only</span>
+        <% end %>
+      </h1>
+      <small class="text-muted">
+        <i class="bi bi-eye"></i> <%= pluralize(@resource.view_count, 'view') %>
+        <span class="ms-2"><i class="bi bi-clock"></i> Updated <%= time_ago_in_words(@resource.updated_at) %> ago</span>
+        <% if has_children %>
+          <span class="ms-2"><i class="bi bi-diagram-3"></i> <%= pluralize(@resource.descendants.count, 'child resource') %></span>
+        <% end %>
+      </small>
+    </div>
+    <div>
+      <% if current_user&.admin? %>
+        <%= link_to "Edit", edit_resource_path(@resource), class: "btn btn-outline-secondary" %>
+        <%= button_to "Delete", @resource, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-outline-danger", form: { style: "display: inline;" } %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if has_children %>
+    <div class="alert alert-info mb-4">
+      <i class="bi bi-info-circle"></i> 
+      This resource includes locations from <%= pluralize(@resource.descendants.count, 'child resource') %>:
+      <% @resource.children.each_with_index do |child, idx| %>
+        <%= link_to child.name, child %><%= idx < @resource.children.count - 1 ? ", " : "" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @resource.external? && all_external_locations.any? %>
+    <%# External resource with locations: show OSM map with all markers %>
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="bi bi-geo-alt"></i> <%= pluralize(all_external_locations.count, 'Location') %>
+          <% if has_children %>
+            <small class="text-muted">(including child resources)</small>
+          <% end %>
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <div id="resource-osm-map" style="height: 450px;"></div>
+      </div>
+    </div>
+
+    <%# Location cards %>
+    <div class="row">
+      <% all_external_locations.each_with_index do |location, idx| %>
+        <% color = marker_colors[idx % marker_colors.length] %>
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card h-100" style="border-left: 4px solid <%= color %>;">
+            <div class="card-body">
+              <div class="d-flex align-items-start">
+                <span class="badge rounded-circle d-flex align-items-center justify-content-center me-2" 
+                      style="width: 28px; height: 28px; background: <%= color %>; color: white; flex-shrink: 0;">
+                  <%= idx + 1 %>
+                </span>
+                <div class="flex-grow-1">
+                  <% if location.label.present? %>
+                    <h6 class="mb-1"><%= location.label %></h6>
+                  <% else %>
+                    <h6 class="mb-1 text-muted">Location <%= idx + 1 %></h6>
+                  <% end %>
+                  <% if location.resource != @resource %>
+                    <small class="text-muted d-block mb-1">
+                      <i class="bi bi-arrow-return-right"></i> <%= link_to location.resource.name, location.resource %>
+                    </small>
+                  <% end %>
+                  <small class="text-muted d-block mb-2">
+                    <i class="bi bi-geo"></i> <%= location.latitude %>, <%= location.longitude %>
+                  </small>
+                  <div class="btn-group btn-group-sm">
+                    <% if location.url.present? %>
+                      <%= link_to location.url, target: "_blank", rel: "noopener", class: "btn btn-primary" do %>
+                        <i class="bi bi-box-arrow-up-right"></i> Visit
+                      <% end %>
+                    <% end %>
+                    <%= link_to "https://www.openstreetmap.org/?mlat=#{location.latitude}&mlon=#{location.longitude}&zoom=17", target: "_blank", rel: "noopener", class: "btn btn-outline-secondary", title: "View on map" do %>
+                      <i class="bi bi-map"></i>
+                    <% end %>
+                    <%= link_to "https://www.openstreetmap.org/directions?to=#{location.latitude},#{location.longitude}", target: "_blank", rel: "noopener", class: "btn btn-outline-secondary", title: "Get directions" do %>
+                      <i class="bi bi-signpost-2"></i>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @resource.resource_urls.any? %>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Source URLs</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          <% @resource.resource_urls.each do |url| %>
+            <li class="list-group-item">
+              <%= link_to url.label.presence || url.url, url.url, target: "_blank", rel: "noopener" %>
+              <i class="bi bi-box-arrow-up-right small"></i>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <!-- Leaflet for OSM map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const locations = [
+          <% all_external_locations.each_with_index do |loc, idx| %>
+            { lat: <%= loc.latitude %>, lng: <%= loc.longitude %>, label: "<%= j(loc.label.presence || "Location #{idx + 1}") %>", color: "<%= marker_colors[idx % marker_colors.length] %>", num: <%= idx + 1 %>, resource: "<%= j(loc.resource.name) %>" }<%= idx < all_external_locations.count - 1 ? ',' : '' %>
+          <% end %>
+        ];
+        
+        <% if site_config.has_location? %>
+        const homeLocation = {
+          lat: <%= site_config.latitude %>,
+          lng: <%= site_config.longitude %>,
+          name: "<%= j(site_config.organization_name.presence || 'Our Location') %>"
+        };
+        <% else %>
+        const homeLocation = null;
+        <% end %>
+        
+        const map = L.map('resource-osm-map');
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        const markers = [];
+        
+        // Add home location marker with special icon
+        if (homeLocation) {
+          const homeIcon = L.divIcon({
+            className: 'home-marker',
+            html: `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                       <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z"/>
+                     </svg>
+                   </div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+          });
+          
+          const homeMarker = L.marker([homeLocation.lat, homeLocation.lng], { icon: homeIcon })
+            .addTo(map)
+            .bindPopup(`<strong>🏠 ${homeLocation.name}</strong><br><small>Our Location</small>`);
+          markers.push(homeMarker);
+        }
+        
+        // Add resource location markers
+        locations.forEach(function(loc) {
+          const icon = L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="background: ${loc.color}; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">${loc.num}</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+          });
+          
+          const marker = L.marker([loc.lat, loc.lng], { icon: icon })
+            .addTo(map)
+            .bindPopup(`<strong>${loc.label}</strong><br><small>${loc.resource}</small><br><small>${loc.lat}, ${loc.lng}</small>`);
+          markers.push(marker);
+        });
+        
+        if (markers.length === 1) {
+          map.setView([markers[0].getLatLng().lat, markers[0].getLatLng().lng], 15);
+        } else if (markers.length > 1) {
+          const group = L.featureGroup(markers);
+          map.fitBounds(group.getBounds().pad(0.1));
+        }
+      });
+    </script>
+
+  <% elsif @resource.internal? %>
+    <%# Internal resource: show facility map locations %>
+    <% locations_by_map = all_internal_locations.group_by { |loc| loc.map } %>
+    <% single_map = locations_by_map.count == 1 %>
+
+    <% if single_map && locations_by_map.any? %>
+      <% map, locations = locations_by_map.first %>
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-map"></i> <%= link_to map.name, map %>
+            <% if has_children %>
+              <small class="text-muted">(including child resources)</small>
+            <% end %>
+          </h5>
+          <%= link_to "View Map", map, class: "btn btn-sm btn-outline-secondary" %>
+        </div>
+        <div class="card-body">
+          <% if locations.count > 1 %>
+            <p class="text-muted small mb-3">
+              <%= locations.count %> locations:
+              <% locations.each_with_index do |location, idx| %>
+                <span class="badge" style="background: <%= marker_colors[idx % marker_colors.length] %>;">
+                  <%= idx + 1 %>
+                  <% if location.resource != @resource %>
+                    (<%= location.resource.name %>)
+                  <% end %>
+                </span>
+                (<%= number_with_precision(location.x, precision: 1) %>%, <%= number_with_precision(location.y, precision: 1) %>%)<%= idx < locations.count - 1 ? " " : "" %>
+              <% end %>
+            </p>
+          <% end %>
+          <% if map.image.attached? %>
+            <div class="position-relative" style="display: inline-block; max-width: 100%;">
+              <%= image_tag map.image, class: "img-fluid border rounded", style: "max-height: 600px;" %>
+              <% locations.each_with_index do |location, idx| %>
+                <% color = marker_colors[idx % marker_colors.length] %>
+                <div class="position-absolute d-flex align-items-center justify-content-center" 
+                     style="left: <%= location.x %>%; top: <%= location.y %>%; width: 28px; height: 28px; background: <%= color %>; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); color: white; font-size: 14px; font-weight: bold;"
+                     title="<%= location.resource.name %>">
+                  <% if locations.count > 1 %><%= idx + 1 %><% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+    <% elsif locations_by_map.any? %>
+      <%# Multiple maps %>
+      <div class="row">
+        <div class="col-md-6">
+          <% if @resource.resource_urls.any? %>
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Source URLs</h5>
+              </div>
+              <ul class="list-group list-group-flush">
+                <% @resource.resource_urls.each do |url| %>
+                  <li class="list-group-item">
+                    <%= link_to url.label.presence || url.url, url.url, target: "_blank", rel: "noopener" %>
+                    <i class="bi bi-box-arrow-up-right small"></i>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="bi bi-map"></i> Map Locations (<%= all_internal_locations.count %> on <%= locations_by_map.count %> <%= "map".pluralize(locations_by_map.count) %>)
+                <% if has_children %>
+                  <small class="text-muted d-block">(including child resources)</small>
+                <% end %>
+              </h5>
+            </div>
+            <div class="card-body">
+              <% locations_by_map.each do |map, locations| %>
+                <div class="mb-4 pb-3 border-bottom">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <strong><%= link_to map.name, map %></strong>
+                      <br>
+                      <small class="text-muted">
+                        <%= locations.count %> <%= "location".pluralize(locations.count) %>
+                      </small>
+                    </div>
+                    <%= link_to "View Map", map, class: "btn btn-sm btn-outline-secondary" %>
+                  </div>
+                  <% if map.image.attached? %>
+                    <div class="position-relative" style="display: inline-block; max-width: 100%;">
+                      <%= image_tag map.image, class: "img-fluid border rounded", style: "max-height: 250px; opacity: 0.85;" %>
+                      <% locations.each_with_index do |location, idx| %>
+                        <% color = marker_colors[idx % marker_colors.length] %>
+                        <div class="position-absolute d-flex align-items-center justify-content-center" 
+                             style="left: <%= location.x %>%; top: <%= location.y %>%; width: 24px; height: 24px; background: <%= color %>; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); color: white; font-size: 12px; font-weight: bold;"
+                             title="<%= location.resource.name %>">
+                          <% if locations.count > 1 %><%= idx + 1 %><% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <% else %>
+      <%# No locations %>
+      <% if @resource.resource_urls.any? %>
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Source URLs</h5>
+          </div>
+          <ul class="list-group list-group-flush">
+            <% @resource.resource_urls.each do |url| %>
+              <li class="list-group-item">
+                <%= link_to url.label.presence || url.url, url.url, target: "_blank", rel: "noopener" %>
+                <i class="bi bi-box-arrow-up-right small"></i>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> This resource is not placed on any maps yet.
+      </div>
+    <% end %>
+
+    <% if @resource.resource_urls.any? && single_map %>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Source URLs</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          <% @resource.resource_urls.each do |url| %>
+            <li class="list-group-item">
+              <%= link_to url.label.presence || url.url, url.url, target: "_blank", rel: "noopener" %>
+              <i class="bi bi-box-arrow-up-right small"></i>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+  <% else %>
+    <%# External without locations or other edge cases %>
+    <% if @resource.resource_urls.any? %>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Source URLs</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          <% @resource.resource_urls.each do |url| %>
+            <li class="list-group-item">
+              <%= link_to url.label.presence || url.url, url.url, target: "_blank", rel: "noopener" %>
+              <i class="bi bi-box-arrow-up-right small"></i>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i> This external resource does not have any locations set.
+    </div>
+  <% end %>
+
+  <% if @resource.children.any? %>
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Child Resources</h5>
+      </div>
+      <ul class="list-group list-group-flush">
+        <% @resource.children.order(:name).each do |child| %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <%= link_to child.name, child %>
+            <span class="badge bg-secondary">
+              <% if child.internal? %>
+                <%= child.all_resource_locations.count %> locations
+              <% else %>
+                <%= child.all_external_locations.count %> locations
+              <% end %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= render partial: "shared/journal_panel", locals: { journable: @resource } %>
+
+  <div class="mt-4">
+    <%= link_to "← Back to Resources", resources_path, class: "btn btn-outline-secondary" %>
+  </div>
+</div>

@@ -1,0 +1,124 @@
+<style>
+  .child-row {
+    opacity: 0.85;
+  }
+  [data-bs-theme="light"] .child-row {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+  }
+  [data-bs-theme="dark"] .child-row {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+  }
+  .sortable-header {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .sortable-header:hover {
+    color: var(--bs-primary);
+  }
+  .sortable-header .sort-icon {
+    opacity: 0.3;
+    margin-left: 0.25rem;
+  }
+  .sortable-header.active .sort-icon {
+    opacity: 1;
+  }
+</style>
+
+<%
+  # Helper to generate sort links
+  def sort_link_for(column, label, current_sort, current_dir)
+    is_active = current_sort == column
+    new_direction = (is_active && current_dir == 'asc') ? 'desc' : 'asc'
+    icon = if is_active
+      current_dir == 'asc' ? 'bi-sort-up' : 'bi-sort-down'
+    else
+      'bi-arrow-down-up'
+    end
+    
+    link_to resources_path(sort: column, direction: new_direction), class: "text-decoration-none text-reset sortable-header #{is_active ? 'active' : ''}" do
+      "#{label} <i class='bi #{icon} sort-icon'></i>".html_safe
+    end
+  end
+%>
+
+<% if resources.any? %>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th><%= sort_link_for('name', 'Name', @sort_column, @sort_direction) %></th>
+          <th><%= sort_link_for('views', 'Views', @sort_column, @sort_direction) %></th>
+          <th><%= sort_link_for('updated', 'Updated', @sort_column, @sort_direction) %></th>
+          <th><%= sort_link_for('type', 'Type', @sort_column, @sort_direction) %></th>
+          <th><%= sort_link_for('locations', 'Locations', @sort_column, @sort_direction) %></th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% resources.each do |resource| %>
+          <% is_child = resource.parent.present? && @sort_column == 'name' && @sort_direction == 'asc' %>
+          <tr class="<%= is_child ? 'child-row' : '' %>">
+            <td>
+              <% if is_child %>
+                <span class="text-muted ms-3 me-1"><i class="bi bi-arrow-return-right"></i></span>
+              <% end %>
+              <%= link_to resource.name, resource, class: (is_child ? '' : 'fw-semibold') %>
+              <% if resource.admin_only? %>
+                <span class="badge bg-warning text-dark" title="Admin only">
+                  <i class="bi bi-shield-lock"></i>
+                </span>
+              <% end %>
+              <% if resource.children.any? %>
+                <span class="badge bg-secondary" title="<%= resource.children.count %> child resources">
+                  <i class="bi bi-diagram-3"></i> <%= resource.children.count %>
+                </span>
+              <% end %>
+            </td>
+            <td>
+              <span class="badge bg-secondary"><%= resource.view_count %></span>
+            </td>
+            <td>
+              <small class="text-muted" title="<%= resource.updated_at.strftime('%B %d, %Y at %I:%M %p') %>">
+                <%= time_ago_in_words(resource.updated_at) %>
+              </small>
+            </td>
+            <td>
+              <% if resource.internal? %>
+                <span class="badge bg-primary">Internal</span>
+              <% else %>
+                <span class="badge bg-success">External</span>
+              <% end %>
+            </td>
+            <td>
+              <% if resource.internal? %>
+                <% if resource.resource_locations.any? %>
+                  <span class="badge bg-info"><%= resource.resource_locations.count %></span>
+                  <small class="text-muted"><%= resource.resource_locations.map { |loc| loc.map.name }.uniq.join(", ") %></small>
+                <% else %>
+                  <span class="text-muted">None</span>
+                <% end %>
+              <% else %>
+                <% if resource.resource_external_locations.any? %>
+                  <span class="badge bg-info"><%= resource.resource_external_locations.count %></span>
+                <% else %>
+                  <span class="text-muted">None</span>
+                <% end %>
+              <% end %>
+            </td>
+            <td>
+              <%= link_to "View", resource, class: "btn btn-sm btn-outline-primary" %>
+              <% if current_user&.admin? %>
+                <%= link_to "Edit", edit_resource_path(resource), class: "btn btn-sm btn-outline-secondary" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="alert alert-info">
+    No resources found.
+  </div>
+<% end %>

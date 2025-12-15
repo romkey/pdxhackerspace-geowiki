@@ -1,0 +1,633 @@
+<%= form_with model: resource, class: "needs-validation" do |form| %>
+  <% if resource.errors.any? %>
+    <div class="alert alert-danger">
+      <h4 class="alert-heading"><%= pluralize(resource.errors.count, "error") %> prohibited this resource from being saved:</h4>
+      <ul class="mb-0">
+        <% resource.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">Basic Information</h5>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <%= form.label :name, class: "form-label" %>
+        <%= form.text_field :name, class: "form-control", required: true %>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check form-switch">
+          <%= form.check_box :internal, class: "form-check-input", id: "resource_internal" %>
+          <%= form.label :internal, "Internal Resource", class: "form-check-label" %>
+        </div>
+        <div class="form-text">Internal resources are within the facility and use map locations. External resources use geographic coordinates.</div>
+      </div>
+
+      <div class="mb-3">
+        <%= form.label :parent_id, "Parent Resource", class: "form-label" %>
+        <%= form.collection_select :parent_id, Resource.where.not(id: resource.id).order(:name), :id, :name, { include_blank: "(No parent - top level resource)" }, class: "form-select" %>
+        <div class="form-text">If this resource is a child of another resource (e.g., a specific restroom is a child of "Restrooms"), select the parent here. Viewing the parent will show all child locations.</div>
+      </div>
+
+      <% if current_user&.admin? %>
+        <div class="mb-3">
+          <div class="form-check form-switch">
+            <%= form.check_box :admin_only, class: "form-check-input" %>
+            <%= form.label :admin_only, "Admin Only", class: "form-check-label" %>
+          </div>
+          <div class="form-text text-warning"><i class="bi bi-shield-lock"></i> Admin-only resources are only visible to administrators.</div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Source URLs</h5>
+    </div>
+    <div class="card-body" id="resource-urls">
+      <%= form.fields_for :resource_urls do |url_form| %>
+        <div class="resource-url-fields mb-3">
+          <div class="row">
+            <div class="col-md-5">
+              <%= url_form.label :url, "URL", class: "form-label" %>
+              <%= url_form.url_field :url, class: "form-control", placeholder: "https://example.com" %>
+            </div>
+            <div class="col-md-5">
+              <%= url_form.label :label, "Label (optional)", class: "form-label" %>
+              <%= url_form.text_field :label, class: "form-control", placeholder: "Documentation" %>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <% unless url_form.object.new_record? && resource.resource_urls.size <= 1 %>
+                <div class="form-check">
+                  <%= url_form.check_box :_destroy, class: "form-check-input" %>
+                  <%= url_form.label :_destroy, "Remove", class: "form-check-label text-danger" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# External resources: Multiple geographic locations %>
+  <div class="card mb-4" id="external-locations-card" style="display: none;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Geographic Locations</h5>
+      <button type="button" class="btn btn-sm btn-outline-primary" id="add-external-location-btn" onclick="window.addExtLocation()">
+        <i class="bi bi-plus-lg"></i> Add Location
+      </button>
+    </div>
+    <div class="card-body">
+      <p class="text-muted small mb-3"><i class="bi bi-crosshair"></i> Click on the map to set a location. Each location can have its own URL.</p>
+      
+      <div id="osm-map-picker" style="height: 400px; border-radius: 8px; margin-bottom: 1rem;"></div>
+      
+      <div id="external-locations-list">
+        <%= form.fields_for :resource_external_locations do |loc_form| %>
+          <% loc_index = loc_form.index %>
+          <div class="external-location-fields card mb-3" data-ext-index="<%= loc_index %>">
+            <div class="card-body py-2">
+              <div class="row align-items-end">
+                <div class="col-md-2">
+                  <label class="form-label small">Latitude</label>
+                  <%= loc_form.number_field :latitude, class: "form-control form-control-sm ext-lat", step: "0.0000001", data: { ext_index: loc_index } %>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small">Longitude</label>
+                  <%= loc_form.number_field :longitude, class: "form-control form-control-sm ext-lng", step: "0.0000001", data: { ext_index: loc_index } %>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">URL (optional)</label>
+                  <%= loc_form.url_field :url, class: "form-control form-control-sm", placeholder: "https://order.example.com" %>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">Label (optional)</label>
+                  <%= loc_form.text_field :label, class: "form-control form-control-sm", placeholder: "Downtown location" %>
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeExtLocation('<%= loc_index %>')">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <%= loc_form.hidden_field :_destroy, class: "ext-destroy-field", value: "false", data: { ext_index: loc_index } %>
+                </div>
+          </div>
+        </div>
+          </div>
+        <% end %>
+        </div>
+      
+      <div id="no-external-locations-message" class="text-muted text-center py-3">
+        <i class="bi bi-geo-alt"></i> No locations added. Click "Add Location" or click on the map.
+      </div>
+    </div>
+  </div>
+
+  <%# Internal resources: Map locations %>
+  <% all_maps = Map.order(:name) %>
+  <% single_map = all_maps.count == 1 %>
+  <div class="card mb-4" id="map-locations-card">
+    <div class="card-header">
+      <h5 class="mb-0">Map Locations</h5>
+    </div>
+    <div class="card-body">
+      <%# Map selector - only show if multiple maps %>
+      <% unless single_map %>
+        <div class="mb-3">
+          <label class="form-label">Select Map</label>
+          <select id="shared-map-selector" class="form-select">
+            <option value="">Choose a map...</option>
+            <% all_maps.each do |map| %>
+              <option value="<%= map.id %>" data-name="<%= map.name %>"><%= map.name %></option>
+            <% end %>
+          </select>
+        </div>
+      <% else %>
+        <input type="hidden" id="shared-map-selector" value="<%= all_maps.first&.id %>" data-name="<%= all_maps.first&.name %>" data-single="true">
+      <% end %>
+      
+      <%# Location entries list %>
+      <div id="internal-locations-list" class="mb-3">
+      <%= form.fields_for :resource_locations do |location_form| %>
+          <% location_index = location_form.index %>
+          <div class="internal-location-entry d-flex align-items-center gap-2 mb-2 p-2 border rounded" data-location-index="<%= location_index %>">
+            <span class="badge bg-danger location-number"></span>
+            <%= location_form.hidden_field :map_id, class: "location-map-id", data: { location_index: location_index } %>
+            <span class="location-map-name text-muted small"><%= location_form.object.map&.name %></span>
+            <span class="flex-grow-1">
+              (<span class="location-x-display"><%= location_form.object.x&.round(1) %></span>%, 
+               <span class="location-y-display"><%= location_form.object.y&.round(1) %></span>%)
+            </span>
+            <%= location_form.hidden_field :x, class: "location-x", data: { location_index: location_index } %>
+            <%= location_form.hidden_field :y, class: "location-y", data: { location_index: location_index } %>
+            <%= location_form.hidden_field :_destroy, class: "destroy-field", value: "false", data: { location_index: location_index } %>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-int-location-btn" data-location-index="<%= location_index %>">
+              <i class="bi bi-trash"></i>
+            </button>
+                </div>
+              <% end %>
+            </div>
+      
+      <div id="no-internal-locations-message" class="text-muted text-center py-2 mb-3">
+        <i class="bi bi-crosshair"></i> Click on the map below to add locations
+          </div>
+      
+      <%# Shared map picker %>
+      <div id="shared-map-picker" style="display: none;">
+        <div class="position-relative" style="display: inline-block; max-width: 100%;">
+          <img id="shared-map-image" class="img-fluid border rounded" style="cursor: crosshair; max-height: 500px;">
+          <div id="shared-map-markers"></div>
+        </div>
+      </div>
+      
+      <div id="no-map-selected-message" class="text-muted text-center py-4">
+        <i class="bi bi-map"></i> 
+        <% if single_map %>
+          Loading map...
+        <% else %>
+          Select a map above to add locations
+      <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <%= form.submit class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<!-- Leaflet CSS and JS for OSM map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+// Global variables for external locations
+var osmMap = null;
+var extLocationIndex = <%= resource.resource_external_locations.size %>;
+var homeMarker = null;
+
+// Home location from SiteConfig
+<% site_config = SiteConfig.instance %>
+<% if site_config.has_location? %>
+var homeLocation = {
+  lat: <%= site_config.latitude %>,
+  lng: <%= site_config.longitude %>,
+  name: "<%= j(site_config.organization_name.presence || 'Our Location') %>"
+};
+<% else %>
+var homeLocation = null;
+<% end %>
+
+// Add external location - called from button onclick
+window.addExtLocation = function(lat, lng) {
+  var list = document.getElementById('external-locations-list');
+  var msg = document.getElementById('no-external-locations-message');
+  
+  var idx = Date.now();
+  var html = `
+    <div class="external-location-fields card mb-3" data-ext-index="${idx}">
+      <div class="card-body py-2">
+        <div class="row align-items-end">
+          <div class="col-md-2">
+            <label class="form-label small">Latitude</label>
+            <input type="number" name="resource[resource_external_locations_attributes][${idx}][latitude]" 
+                   class="form-control form-control-sm ext-lat" step="0.0000001" value="${lat !== undefined ? lat.toFixed(7) : ''}">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small">Longitude</label>
+            <input type="number" name="resource[resource_external_locations_attributes][${idx}][longitude]" 
+                   class="form-control form-control-sm ext-lng" step="0.0000001" value="${lng !== undefined ? lng.toFixed(7) : ''}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small">URL (optional)</label>
+            <input type="url" name="resource[resource_external_locations_attributes][${idx}][url]" 
+                   class="form-control form-control-sm" placeholder="https://order.example.com">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small">Label (optional)</label>
+            <input type="text" name="resource[resource_external_locations_attributes][${idx}][label]" 
+                   class="form-control form-control-sm" placeholder="Downtown location">
+          </div>
+          <div class="col-md-2">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeExtLocation('${idx}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  if (msg) {
+    msg.insertAdjacentHTML('beforebegin', html);
+    msg.style.display = 'none';
+  } else {
+    list.insertAdjacentHTML('beforeend', html);
+  }
+  
+  updateExtMarkers();
+};
+
+// Remove external location
+window.removeExtLocation = function(idx) {
+  var fields = document.querySelector('.external-location-fields[data-ext-index="' + idx + '"]');
+  if (fields) {
+    var idField = fields.querySelector('input[name*="[id]"]');
+    if (idField) {
+      // Existing record - mark for destruction
+      var destroyField = fields.querySelector('.ext-destroy-field');
+      if (destroyField) destroyField.value = 'true';
+      fields.style.display = 'none';
+    } else {
+      // New record - just remove
+      fields.remove();
+    }
+  }
+  updateExtNoLocMsg();
+  updateExtMarkers();
+};
+
+// Update "no locations" message
+function updateExtNoLocMsg() {
+  var msg = document.getElementById('no-external-locations-message');
+  var visible = document.querySelectorAll('.external-location-fields:not([style*="display: none"])');
+  if (msg) {
+    msg.style.display = visible.length === 0 ? 'block' : 'none';
+  }
+}
+
+// Update map markers
+function updateExtMarkers() {
+  if (!osmMap || typeof L === 'undefined') return;
+  
+  // Remove existing markers
+  osmMap.eachLayer(function(layer) {
+    if (layer instanceof L.Marker) {
+      osmMap.removeLayer(layer);
+    }
+  });
+  
+  // Add markers for each location
+  var colors = ['#e74c3c', '#f39c12', '#27ae60', '#3498db', '#9b59b6', '#1abc9c'];
+  var colorIdx = 0;
+  
+  document.querySelectorAll('.external-location-fields:not([style*="display: none"])').forEach(function(fields) {
+    var latInput = fields.querySelector('.ext-lat');
+    var lngInput = fields.querySelector('.ext-lng');
+    
+    if (latInput && lngInput && latInput.value && lngInput.value) {
+      var lat = parseFloat(latInput.value);
+      var lng = parseFloat(lngInput.value);
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        var color = colors[colorIdx % colors.length];
+        var icon = L.divIcon({
+          className: 'custom-marker',
+          html: '<div style="background:' + color + ';width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+        L.marker([lat, lng], {icon: icon}).addTo(osmMap);
+        fields.style.borderLeft = '4px solid ' + color;
+        colorIdx++;
+      }
+    }
+  });
+}
+
+// Initialize OSM map
+function initOsmMap() {
+  if (osmMap) return;
+  if (typeof L === 'undefined') {
+    console.error('Leaflet not loaded');
+    return;
+  }
+  
+  var mapDiv = document.getElementById('osm-map-picker');
+  if (!mapDiv || mapDiv.offsetParent === null) {
+    console.log('Map div not visible yet');
+    return;
+  }
+  
+  // Center on home location if available, otherwise Portland
+  var centerLat = homeLocation ? homeLocation.lat : 45.5155;
+  var centerLng = homeLocation ? homeLocation.lng : -122.6793;
+  
+  osmMap = L.map('osm-map-picker').setView([centerLat, centerLng], 11);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(osmMap);
+  
+  // Add home location marker with special icon
+  if (homeLocation) {
+    var homeIcon = L.divIcon({
+      className: 'home-marker',
+      html: '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">' +
+            '<path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z"/>' +
+            '</svg></div>',
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
+    });
+    
+    homeMarker = L.marker([homeLocation.lat, homeLocation.lng], { icon: homeIcon })
+      .addTo(osmMap)
+      .bindPopup('<strong>🏠 ' + homeLocation.name + '</strong><br><small>Our Location</small>');
+  }
+  
+  // Click to add location
+  osmMap.on('click', function(e) {
+    window.addExtLocation(e.latlng.lat, e.latlng.lng);
+  });
+  
+  updateExtMarkers();
+  console.log('OSM map initialized');
+}
+
+// Toggle between internal/external
+function toggleResourceType() {
+  var checkbox = document.getElementById('resource_internal');
+  var extCard = document.getElementById('external-locations-card');
+  var intCard = document.getElementById('map-locations-card');
+  
+  if (!checkbox || !extCard || !intCard) return;
+  
+  if (checkbox.checked) {
+    extCard.style.display = 'none';
+    intCard.style.display = 'block';
+  } else {
+    extCard.style.display = 'block';
+    intCard.style.display = 'none';
+    setTimeout(function() {
+      initOsmMap();
+      if (osmMap) osmMap.invalidateSize();
+      updateExtNoLocMsg();
+    }, 100);
+  }
+}
+
+// Internal locations management
+var currentMapId = null;
+var currentMapName = '';
+var markerColors = ['#e74c3c', '#f39c12', '#27ae60', '#3498db', '#9b59b6', '#1abc9c', '#e67e22', '#2ecc71'];
+
+function initInternalLocations() {
+  var selector = document.getElementById('shared-map-selector');
+  var mapPicker = document.getElementById('shared-map-picker');
+  var mapImage = document.getElementById('shared-map-image');
+  var noMapMsg = document.getElementById('no-map-selected-message');
+  
+  if (!selector) return;
+  
+  // Check if it's a hidden input (single map) or a select (multiple maps)
+  var isSingleMap = selector.dataset.single === 'true';
+  
+  function loadMap(mapId, mapName) {
+    if (!mapId) {
+      mapPicker.style.display = 'none';
+      noMapMsg.style.display = 'block';
+      currentMapId = null;
+      return;
+    }
+    
+    currentMapId = mapId;
+    currentMapName = mapName || '';
+    
+    fetch('/maps/' + mapId + '/image_url')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.url) {
+          mapImage.src = data.url;
+          mapImage.alt = data.name;
+          mapPicker.style.display = 'block';
+          noMapMsg.style.display = 'none';
+          updateIntMarkers();
+        } else {
+          mapPicker.style.display = 'none';
+          noMapMsg.style.display = 'block';
+          noMapMsg.innerHTML = '<i class="bi bi-exclamation-triangle"></i> This map has no image uploaded';
+        }
+      });
+  }
+  
+  if (isSingleMap) {
+    // Auto-load the single map
+    loadMap(selector.value, selector.dataset.name);
+  } else {
+    // Listen for map selection changes
+    selector.onchange = function() {
+      var selectedOption = this.options[this.selectedIndex];
+      var mapName = selectedOption ? selectedOption.dataset.name : '';
+      loadMap(this.value, mapName);
+    };
+    
+    // Check if there are existing locations and load their map
+    var firstLocation = document.querySelector('.internal-location-entry:not([style*="display: none"])');
+    if (firstLocation) {
+      var mapIdInput = firstLocation.querySelector('.location-map-id');
+      var mapNameSpan = firstLocation.querySelector('.location-map-name');
+      if (mapIdInput && mapIdInput.value) {
+        selector.value = mapIdInput.value;
+        var mapName = mapNameSpan ? mapNameSpan.textContent : '';
+        loadMap(mapIdInput.value, mapName);
+      }
+    }
+  }
+  
+  // Click on map to add location
+  mapImage.onclick = function(e) {
+    if (!currentMapId) return;
+    
+    var rect = mapImage.getBoundingClientRect();
+    var xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    var yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    addInternalLocation(currentMapId, currentMapName, xPct, yPct);
+  };
+  
+  // Init existing location remove buttons
+  document.querySelectorAll('.internal-location-entry').forEach(function(entry) {
+    var idx = entry.dataset.locationIndex;
+    initIntRemoveBtn(idx);
+  });
+  
+  updateIntNoLocMsg();
+  updateIntMarkers();
+}
+
+function addInternalLocation(mapId, mapName, x, y) {
+  var list = document.getElementById('internal-locations-list');
+  var idx = Date.now();
+  
+  var html = `
+    <div class="internal-location-entry d-flex align-items-center gap-2 mb-2 p-2 border rounded" data-location-index="${idx}">
+      <span class="badge bg-danger location-number"></span>
+      <input type="hidden" name="resource[resource_locations_attributes][${idx}][map_id]" class="location-map-id" value="${mapId}" data-location-index="${idx}">
+      <span class="location-map-name text-muted small">${mapName}</span>
+      <span class="flex-grow-1">
+        (<span class="location-x-display">${x.toFixed(1)}</span>%, 
+         <span class="location-y-display">${y.toFixed(1)}</span>%)
+      </span>
+      <input type="hidden" name="resource[resource_locations_attributes][${idx}][x]" class="location-x" value="${x.toFixed(3)}" data-location-index="${idx}">
+      <input type="hidden" name="resource[resource_locations_attributes][${idx}][y]" class="location-y" value="${y.toFixed(3)}" data-location-index="${idx}">
+      <input type="hidden" name="resource[resource_locations_attributes][${idx}][_destroy]" class="destroy-field" value="false" data-location-index="${idx}">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-int-location-btn" data-location-index="${idx}">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  `;
+  
+  list.insertAdjacentHTML('beforeend', html);
+  initIntRemoveBtn(idx);
+  updateIntNoLocMsg();
+  updateIntMarkers();
+}
+
+function initIntRemoveBtn(idx) {
+  var btn = document.querySelector('.remove-int-location-btn[data-location-index="' + idx + '"]');
+  var entry = document.querySelector('.internal-location-entry[data-location-index="' + idx + '"]');
+  
+  if (!btn || !entry) return;
+  
+  btn.onclick = function() {
+    var idField = entry.querySelector('input[name*="[id]"]');
+    var destroyField = entry.querySelector('.destroy-field');
+    
+    if (idField) {
+      // Existing record - mark for destruction
+      destroyField.value = 'true';
+      entry.style.display = 'none';
+    } else {
+      // New record - remove from DOM
+      entry.remove();
+    }
+    
+    updateIntNoLocMsg();
+    updateIntMarkers();
+  };
+}
+
+function updateIntNoLocMsg() {
+  var msg = document.getElementById('no-internal-locations-message');
+  var visible = document.querySelectorAll('.internal-location-entry:not([style*="display: none"])');
+  if (msg) {
+    msg.style.display = visible.length === 0 ? 'block' : 'none';
+  }
+}
+
+function updateIntMarkers() {
+  var markersContainer = document.getElementById('shared-map-markers');
+  if (!markersContainer) return;
+  
+  markersContainer.innerHTML = '';
+  
+  var entries = document.querySelectorAll('.internal-location-entry:not([style*="display: none"])');
+  var colorIdx = 0;
+  
+  entries.forEach(function(entry, idx) {
+    var mapIdInput = entry.querySelector('.location-map-id');
+    var xInput = entry.querySelector('.location-x');
+    var yInput = entry.querySelector('.location-y');
+    var numberBadge = entry.querySelector('.location-number');
+    
+    // Only show markers for current map
+    if (mapIdInput && mapIdInput.value == currentMapId && xInput && yInput) {
+      var x = parseFloat(xInput.value);
+      var y = parseFloat(yInput.value);
+      var color = markerColors[colorIdx % markerColors.length];
+      
+      // Update badge color and number
+      if (numberBadge) {
+        numberBadge.textContent = colorIdx + 1;
+        numberBadge.style.background = color;
+      }
+      
+      // Update entry border color
+      entry.style.borderLeftColor = color;
+      entry.style.borderLeftWidth = '4px';
+      
+      // Create marker on map
+      var marker = document.createElement('div');
+      marker.className = 'position-absolute d-flex align-items-center justify-content-center';
+      marker.style.cssText = 'left:' + x + '%;top:' + y + '%;width:28px;height:28px;background:' + color + ';border:3px solid white;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 2px 5px rgba(0,0,0,0.3);color:white;font-weight:bold;font-size:14px;pointer-events:none;';
+      marker.textContent = colorIdx + 1;
+      markersContainer.appendChild(marker);
+      
+      colorIdx++;
+    } else if (numberBadge) {
+      // Different map - gray out
+      numberBadge.textContent = '•';
+      numberBadge.style.background = '#6c757d';
+      entry.style.borderLeftColor = '#dee2e6';
+      entry.style.borderLeftWidth = '4px';
+    }
+  });
+}
+
+// Initialize on page load
+function initForm() {
+  var checkbox = document.getElementById('resource_internal');
+  if (!checkbox) return;
+  
+  checkbox.onchange = toggleResourceType;
+  toggleResourceType();
+  initInternalLocations();
+  updateExtNoLocMsg();
+}
+
+// Run on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initForm);
+} else {
+  initForm();
+}
+document.addEventListener('turbo:load', initForm);
+</script>

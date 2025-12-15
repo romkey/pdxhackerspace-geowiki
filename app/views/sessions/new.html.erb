@@ -1,0 +1,46 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="text-center">Login</h2>
+        </div>
+        <div class="card-body">
+          <% if ENV["AUTHENTIK_CLIENT_ID"].present? %>
+            <div class="mb-4">
+              <%= link_to "Login with Authentik", "/auth/authentik", class: "btn btn-primary btn-lg w-100" %>
+            </div>
+            <hr>
+            <p class="text-center text-muted">Or</p>
+            <hr>
+          <% end %>
+
+          <% if ENV["LOCAL_ADMIN_EMAIL"].present? || User.where(provider: nil).exists? %>
+            <%= form_with url: login_path, local: true, class: "mt-4" do |form| %>
+              <div class="mb-3">
+                <%= form.label :email, class: "form-label" %>
+                <%= form.email_field :email, class: "form-control", required: true, autofocus: true %>
+              </div>
+
+              <div class="mb-3">
+                <%= form.label :password, class: "form-label" %>
+                <%= form.password_field :password, class: "form-control", required: true %>
+              </div>
+
+              <div class="d-grid">
+                <%= form.submit "Login", class: "btn btn-primary" %>
+              </div>
+            <% end %>
+          <% end %>
+
+          <% if flash[:alert] %>
+            <div class="alert alert-danger mt-3" role="alert">
+              <%= flash[:alert] %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

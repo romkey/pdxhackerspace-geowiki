@@ -1,0 +1,67 @@
+<%= form_with model: map, class: "needs-validation" do |form| %>
+  <% if map.errors.any? %>
+    <div class="alert alert-danger">
+      <h4 class="alert-heading"><%= pluralize(map.errors.count, "error") %> prohibited this map from being saved:</h4>
+      <ul class="mb-0">
+        <% map.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :name, class: "form-label" %>
+    <%= form.text_field :name, class: "form-control", required: true %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :slack_channel, "Slack Channel (optional)", class: "form-label" %>
+    <%= form.text_field :slack_channel, class: "form-control", placeholder: "#channel-name" %>
+    <div class="form-text">Enter the Slack channel name (with or without #)</div>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :parent_id, "Parent Map (optional)", class: "form-label" %>
+    <%= form.collection_select :parent_id, Map.where.not(id: map.id), :id, :name, { include_blank: "None (root map)" }, class: "form-select" %>
+    <div class="form-text">Select a parent map to make this a child map</div>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :image, class: "form-label" %>
+    <% if map.image.attached? %>
+      <div class="mb-2">
+        <p>Current image:</p>
+        <%= image_tag map.image.variant(resize_to_limit: [200, 150]), class: "img-thumbnail" %>
+      </div>
+    <% end %>
+    <%= form.file_field :image, class: "form-control", accept: "image/png,image/jpeg,image/gif,image/webp" %>
+    <div class="form-text">Upload a PNG, JPEG, GIF, or WebP image (max 10MB)</div>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :maintainer_ids, "Maintainers", class: "form-label" %>
+    <%= form.collection_check_boxes :maintainer_ids, User.order(:name, :email), :id, ->(user) { user.name || user.email } do |b| %>
+      <div class="form-check">
+        <%= b.check_box class: "form-check-input" %>
+        <%= b.label class: "form-check-label" %>
+      </div>
+    <% end %>
+    <div class="form-text">Select users who can edit this map</div>
+  </div>
+
+  <% if current_user&.admin? %>
+    <div class="mb-3">
+      <div class="form-check form-switch">
+        <%= form.check_box :is_default, class: "form-check-input", id: "map_is_default" %>
+        <%= form.label :is_default, "Set as Default Map", class: "form-check-label" %>
+      </div>
+      <div class="form-text">The default map is displayed on the home page. Only one map can be the default.</div>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.submit class: "btn btn-primary" %>
+  </div>
+<% end %>
+

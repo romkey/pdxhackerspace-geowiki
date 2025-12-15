@@ -1,0 +1,50 @@
+<% if entries.any? %>
+  <div class="list-group list-group-flush">
+    <% entries.each do |entry| %>
+      <div class="list-group-item">
+        <div class="d-flex w-100 justify-content-between align-items-start">
+          <div class="d-flex align-items-start">
+            <span class="badge bg-<%= entry.action_color %> me-2" style="min-width: 80px;">
+              <i class="bi bi-<%= entry.action_icon %>"></i> <%= entry.action.capitalize %>
+            </span>
+            <div>
+              <span class="badge bg-secondary me-1"><%= entry.journable_type %></span>
+              <% if entry.journable && entry.action != "deleted" %>
+                <% if entry.journable_type == "Resource" %>
+                  <%= link_to entry.journable_name, resource_path(entry.journable) %>
+                <% elsif entry.journable_type == "Map" %>
+                  <%= link_to entry.journable_name, map_path(entry.journable) %>
+                <% end %>
+              <% else %>
+                <span class="text-muted"><%= entry.journable_name %></span>
+                <% if entry.action == "deleted" %>
+                  <span class="text-danger">(deleted)</span>
+                <% end %>
+              <% end %>
+              
+              <% if entry.changes_made.present? && entry.action == "updated" %>
+                <br>
+                <small class="text-muted">
+                  Changed: <%= entry.changes_made.keys.join(", ") %>
+                </small>
+              <% end %>
+            </div>
+          </div>
+          <div class="text-end">
+            <small class="text-muted d-block">
+              <%= time_ago_in_words(entry.created_at) %> ago
+            </small>
+            <small class="text-muted">
+              by <strong><%= entry.user_name %></strong>
+            </small>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="p-4 text-center text-muted">
+    <i class="bi bi-journal"></i> No journal entries found.
+  </div>
+<% end %>
+

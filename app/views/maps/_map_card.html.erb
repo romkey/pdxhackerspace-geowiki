@@ -1,0 +1,47 @@
+<div class="col-md-4 mb-4">
+  <div class="card h-100">
+    <% if map.image.attached? %>
+      <%= image_tag map.image.variant(resize_to_limit: [400, 300]), class: "card-img-top", alt: map.name %>
+    <% else %>
+      <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+        <span class="text-white">No image</span>
+      </div>
+    <% end %>
+    <div class="card-body">
+      <h5 class="card-title">
+        <%= link_to map.name, map %>
+        <% if map.is_default? %>
+          <span class="badge bg-success">Default</span>
+        <% end %>
+      </h5>
+      <% if map.slack_channel.present? %>
+        <p class="card-text">
+          <small class="text-muted">
+            <i class="bi bi-slack"></i> <%= map.slack_channel.start_with?("#") ? map.slack_channel : "##{map.slack_channel}" %>
+          </small>
+        </p>
+      <% end %>
+      <% if map.maintainers.any? %>
+        <p class="card-text">
+          <small class="text-muted">
+            Maintainers: <%= map.maintainers.map(&:name).join(", ") %>
+          </small>
+        </p>
+      <% end %>
+      <% if map.children.any? %>
+        <p class="card-text">
+          <small class="text-muted">
+            <%= pluralize(map.children.count, "child map") %>
+          </small>
+        </p>
+      <% end %>
+    </div>
+    <div class="card-footer">
+      <%= link_to "View", map, class: "btn btn-sm btn-outline-primary" %>
+      <% if current_user && map.can_edit?(current_user) %>
+        <%= link_to "Edit", edit_map_path(map), class: "btn btn-sm btn-outline-secondary" %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

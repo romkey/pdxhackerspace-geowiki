@@ -1,0 +1,127 @@
+<div class="container mt-4">
+  <% if @map.parent %>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><%= link_to "Maps", maps_path %></li>
+        <% @map.ancestors.reverse.each do |ancestor| %>
+          <li class="breadcrumb-item"><%= link_to ancestor.name, ancestor %></li>
+        <% end %>
+        <li class="breadcrumb-item active" aria-current="page"><%= @map.name %></li>
+      </ol>
+    </nav>
+  <% end %>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+      <%= @map.name %>
+      <% if @map.is_default? %>
+        <span class="badge bg-success">Default</span>
+      <% end %>
+    </h1>
+    <div>
+      <% if current_user && @map.can_edit?(current_user) %>
+        <%= link_to "Edit", edit_map_path(@map), class: "btn btn-outline-secondary" %>
+        <%= button_to "Delete", @map, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-outline-danger", form: { style: "display: inline;" } %>
+      <% end %>
+      <% if current_user&.admin? %>
+        <%= link_to "New Child Map", new_map_path(parent_id: @map.id), class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <% if @map.image.attached? %>
+        <div class="card mb-4">
+          <div class="card-body text-center">
+            <%= image_tag @map.image, class: "img-fluid", alt: @map.name %>
+          </div>
+        </div>
+      <% else %>
+        <div class="alert alert-warning">
+          No image uploaded for this map.
+          <% if current_user && @map.can_edit?(current_user) %>
+            <%= link_to "Upload one now", edit_map_path(@map) %>.
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Details</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+          <% if @map.slack_channel.present? %>
+            <li class="list-group-item">
+              <strong>Slack Channel:</strong>
+              <%= @map.slack_channel.start_with?("#") ? @map.slack_channel : "##{@map.slack_channel}" %>
+            </li>
+          <% end %>
+          <% if @map.parent %>
+            <li class="list-group-item">
+              <strong>Parent Map:</strong>
+              <%= link_to @map.parent.name, @map.parent %>
+            </li>
+          <% end %>
+          <li class="list-group-item">
+            <strong>Maintainers:</strong>
+            <% if @map.maintainers.any? %>
+              <ul class="mb-0">
+                <% @map.maintainers.each do |maintainer| %>
+                  <li><%= maintainer.name || maintainer.email %></li>
+                <% end %>
+              </ul>
+            <% else %>
+              <span class="text-muted">No maintainers assigned</span>
+            <% end %>
+          </li>
+        </ul>
+      </div>
+
+      <% if @map.children.any? %>
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Child Maps</h5>
+          </div>
+          <ul class="list-group list-group-flush">
+            <% @map.children.each do |child| %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <%= link_to child.name, child %>
+                <% if child.children.any? %>
+                  <span class="badge bg-secondary"><%= child.children.count %></span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <% if @map.resource_locations.any? %>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Resources on this Map</h5>
+          </div>
+          <ul class="list-group list-group-flush">
+            <% @map.resource_locations.includes(:resource).each do |location| %>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <%= link_to location.resource.name, location.resource %>
+                </div>
+                <small class="text-muted">Position: (<%= number_with_precision(location.x, precision: 1) %>%, <%= number_with_precision(location.y, precision: 1) %>%)</small>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%= render partial: "shared/journal_panel", locals: { journable: @map } %>
+
+  <div class="mt-4">
+    <%= link_to "← Back to Maps", maps_path, class: "btn btn-outline-secondary" %>
+  </div>
+</div>
+

@@ -1,0 +1,149 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-gear"></i> Site Configuration</h1>
+  </div>
+
+  <% if notice.present? %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <%= notice %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% end %>
+
+  <%= form_with model: @site_config, url: site_config_path, method: :patch, class: "needs-validation" do |form| %>
+    <% if @site_config.errors.any? %>
+      <div class="alert alert-danger">
+        <h4 class="alert-heading"><%= pluralize(@site_config.errors.count, "error") %> prohibited this configuration from being saved:</h4>
+        <ul class="mb-0">
+          <% @site_config.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-building"></i> Organization Details</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <%= form.label :organization_name, "Organization Name", class: "form-label" %>
+              <%= form.text_field :organization_name, class: "form-control", placeholder: "PDX Hackerspace" %>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :address, "Address", class: "form-label" %>
+              <%= form.text_area :address, class: "form-control", rows: 3, placeholder: "123 Main Street\nPortland, OR 97201" %>
+              <div class="form-text">Full mailing address of the organization</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Location</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted small mb-3">
+              <i class="bi bi-crosshair"></i> Click on the map to set the organization's location
+            </p>
+
+            <div id="location-map" style="height: 350px; border-radius: 8px; margin-bottom: 1rem;"></div>
+
+            <div class="row">
+              <div class="col-6">
+                <%= form.label :latitude, class: "form-label" %>
+                <%= form.number_field :latitude, class: "form-control", step: "0.0000001", id: "site_config_latitude" %>
+              </div>
+              <div class="col-6">
+                <%= form.label :longitude, class: "form-label" %>
+                <%= form.number_field :longitude, class: "form-control", step: "0.0000001", id: "site_config_longitude" %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <%= form.submit "Save Configuration", class: "btn btn-primary" %>
+      <%= link_to "Cancel", root_path, class: "btn btn-outline-secondary" %>
+    </div>
+  <% end %>
+</div>
+
+<!-- Leaflet CSS and JS for OSM map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var latInput = document.getElementById('site_config_latitude');
+  var lngInput = document.getElementById('site_config_longitude');
+  
+  // Default to Portland, OR or existing location
+  var defaultLat = <%= @site_config.latitude || 45.5155 %>;
+  var defaultLng = <%= @site_config.longitude || -122.6793 %>;
+  var hasLocation = <%= @site_config.has_location? %>;
+  
+  var map = L.map('location-map').setView([defaultLat, defaultLng], hasLocation ? 15 : 11);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  
+  var marker = null;
+  
+  function updateMarker(lat, lng) {
+    if (marker) {
+      marker.setLatLng([lat, lng]);
+    } else {
+      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      
+      marker.on('dragend', function(e) {
+        var pos = e.target.getLatLng();
+        latInput.value = pos.lat.toFixed(7);
+        lngInput.value = pos.lng.toFixed(7);
+      });
+    }
+  }
+  
+  // Show existing marker if location is set
+  if (hasLocation) {
+    updateMarker(defaultLat, defaultLng);
+  }
+  
+  // Click on map to set location
+  map.on('click', function(e) {
+    latInput.value = e.latlng.lat.toFixed(7);
+    lngInput.value = e.latlng.lng.toFixed(7);
+    updateMarker(e.latlng.lat, e.latlng.lng);
+  });
+  
+  // Update marker when inputs change
+  latInput.addEventListener('change', function() {
+    if (latInput.value && lngInput.value) {
+      var lat = parseFloat(latInput.value);
+      var lng = parseFloat(lngInput.value);
+      updateMarker(lat, lng);
+      map.setView([lat, lng], 15);
+    }
+  });
+  
+  lngInput.addEventListener('change', function() {
+    if (latInput.value && lngInput.value) {
+      var lat = parseFloat(latInput.value);
+      var lng = parseFloat(lngInput.value);
+      updateMarker(lat, lng);
+      map.setView([lat, lng], 15);
+    }
+  });
+});
+</script>
+
