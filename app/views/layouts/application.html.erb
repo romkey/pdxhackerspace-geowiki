@@ -224,6 +224,18 @@
 
     <%= yield %>
 
+    <footer class="mt-5 py-3 border-top">
+      <div class="container text-center text-muted small">
+        <a href="<%= Geowiki::GITHUB_URL %>" target="_blank" rel="noopener" class="text-decoration-none">
+          <i class="bi bi-github"></i> Geowiki
+        </a>
+        <span class="mx-2">·</span>
+        <a href="<%= Geowiki::GITHUB_URL %>/releases/tag/v<%= Geowiki::VERSION %>" target="_blank" rel="noopener" class="text-decoration-none">
+          v<%= Geowiki::VERSION %>
+        </a>
+      </div>
+    </footer>
+
     <!-- Bootstrap 5.3.8 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   </body>
