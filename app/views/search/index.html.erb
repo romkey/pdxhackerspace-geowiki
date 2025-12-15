@@ -62,9 +62,6 @@
                         <span class="badge bg-warning text-dark" title="Admin Only"><i class="bi bi-lock"></i></span>
                       <% end %>
                     </h5>
-                    <% if resource.description.present? %>
-                      <p class="mb-1 text-muted"><%= truncate(resource.description, length: 150) %></p>
-                    <% end %>
                   </div>
                   <div class="text-end">
                     <small class="text-muted">
@@ -107,9 +104,6 @@
                         <span class="badge bg-warning text-dark" title="Admin Only"><i class="bi bi-lock"></i></span>
                       <% end %>
                     </h5>
-                    <% if resource.description.present? %>
-                      <p class="mb-1 text-muted"><%= truncate(resource.description, length: 150) %></p>
-                    <% end %>
                   </div>
                   <div class="text-end">
                     <small class="text-muted">
