@@ -295,7 +295,7 @@ function reverseGeocode(lat, lng, addressInput) {
   addressInput.value = 'Loading address...';
   addressInput.disabled = true;
   
-  var url = 'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json';
+  var url = 'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&addressdetails=1';
   
   fetch(url, {
     headers: {
@@ -305,12 +305,28 @@ function reverseGeocode(lat, lng, addressInput) {
   .then(function(response) { return response.json(); })
   .then(function(data) {
     addressInput.disabled = false;
-    if (data && data.display_name) {
-      // Shorten the address a bit - remove country usually
-      var parts = data.display_name.split(', ');
-      if (parts.length > 4) {
-        parts = parts.slice(0, -1); // Remove country
+    if (data && data.address) {
+      // Build address from components (no county, street number joined with road)
+      var addr = data.address;
+      var parts = [];
+      
+      // Street address (number + road, no comma between)
+      if (addr.house_number && addr.road) {
+        parts.push(addr.house_number + ' ' + addr.road);
+      } else if (addr.road) {
+        parts.push(addr.road);
       }
+      
+      // City/town/village
+      var city = addr.city || addr.town || addr.village || addr.hamlet;
+      if (city) parts.push(city);
+      
+      // State
+      if (addr.state) parts.push(addr.state);
+      
+      // Postal code
+      if (addr.postcode) parts.push(addr.postcode);
+      
       addressInput.value = parts.join(', ');
     } else {
       addressInput.value = '';

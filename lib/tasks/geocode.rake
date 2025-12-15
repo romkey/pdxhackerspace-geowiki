@@ -51,7 +51,7 @@ namespace :geocode do
 
   def reverse_geocode(lat, lng)
     uri = URI("https://nominatim.openstreetmap.org/reverse")
-    uri.query = URI.encode_www_form(lat: lat, lon: lng, format: "json")
+    uri.query = URI.encode_www_form(lat: lat, lon: lng, format: "json", addressdetails: 1)
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -65,15 +65,35 @@ namespace :geocode do
 
     if response.code == "200"
       data = JSON.parse(response.body)
-      if data["display_name"]
-        # Shorten address - remove country
-        parts = data["display_name"].split(", ")
-        parts = parts[0..-2] if parts.length > 4
-        parts.join(", ")
-      end
+      format_address(data["address"]) if data["address"]
     else
       raise "HTTP #{response.code}: #{response.message}"
     end
+  end
+
+  def format_address(addr)
+    return nil unless addr
+
+    parts = []
+
+    # Street address (number + road, no comma between)
+    if addr["house_number"] && addr["road"]
+      parts << "#{addr['house_number']} #{addr['road']}"
+    elsif addr["road"]
+      parts << addr["road"]
+    end
+
+    # City/town/village (skip county)
+    city = addr["city"] || addr["town"] || addr["village"] || addr["hamlet"]
+    parts << city if city
+
+    # State
+    parts << addr["state"] if addr["state"]
+
+    # Postal code
+    parts << addr["postcode"] if addr["postcode"]
+
+    parts.join(", ")
   end
 end
 
