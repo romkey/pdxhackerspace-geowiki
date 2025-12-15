@@ -3,7 +3,8 @@
 class MapsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:index, :show, :image_url]
   before_action :set_map, only: [:show, :edit, :update, :destroy]
-  before_action :authorize_edit!, only: [:edit, :update, :destroy]
+  before_action :authorize_edit!, only: [:edit, :update]
+  before_action :authorize_destroy!, only: [:destroy]
   before_action :set_journable_user, only: [:create, :update, :destroy]
 
   def index
@@ -62,6 +63,12 @@ class MapsController < ApplicationController
     return if @map.can_edit?(current_user)
 
     redirect_to @map, alert: "You are not authorized to edit this map."
+  end
+
+  def authorize_destroy!
+    return if current_user&.admin?
+
+    redirect_to @map, alert: "Only admins can delete maps."
   end
 
   def map_params

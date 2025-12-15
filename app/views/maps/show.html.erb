@@ -21,6 +21,8 @@
     <div>
       <% if current_user && @map.can_edit?(current_user) %>
         <%= link_to "Edit", edit_map_path(@map), class: "btn btn-outline-secondary" %>
+      <% end %>
+      <% if current_user&.admin? %>
         <%= button_to "Delete", @map, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-outline-danger", form: { style: "display: inline;" } %>
       <% end %>
       <% if current_user %>
