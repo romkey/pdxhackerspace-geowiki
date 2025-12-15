@@ -85,11 +85,21 @@
       </div>
 
       <div class="mb-3">
-        <div class="form-check form-switch">
-          <%= form.check_box :internal, class: "form-check-input", id: "resource_internal" %>
-          <%= form.label :internal, "Internal Resource", class: "form-check-label" %>
+        <label class="form-label">Where is this resource located?</label>
+        <div class="form-check">
+          <%= form.radio_button :internal, true, class: "form-check-input", id: "resource_internal_true" %>
+          <label class="form-check-label" for="resource_internal_true">
+            <i class="bi bi-building me-1"></i> <strong>On-site</strong>
+            <span class="text-muted d-block small">Located within your facility &mdash; shown on floor maps</span>
+          </label>
         </div>
-        <div class="form-text">Internal resources are within the facility and use map locations. External resources use geographic coordinates.</div>
+        <div class="form-check mt-2">
+          <%= form.radio_button :internal, false, class: "form-check-input", id: "resource_internal_false" %>
+          <label class="form-check-label" for="resource_internal_false">
+            <i class="bi bi-globe me-1"></i> <strong>Off-site</strong>
+            <span class="text-muted d-block small">Located elsewhere in the world &mdash; shown on street maps with address</span>
+          </label>
+        </div>
       </div>
 
       <div class="mb-3">
@@ -535,13 +545,13 @@ function initOsmMap() {
 
 // Toggle between internal/external
 function toggleResourceType() {
-  var checkbox = document.getElementById('resource_internal');
+  var internalRadio = document.getElementById('resource_internal_true');
   var extCard = document.getElementById('external-locations-card');
   var intCard = document.getElementById('map-locations-card');
   
-  if (!checkbox || !extCard || !intCard) return;
+  if (!internalRadio || !extCard || !intCard) return;
   
-  if (checkbox.checked) {
+  if (internalRadio.checked) {
     extCard.style.display = 'none';
     intCard.style.display = 'block';
   } else {
@@ -755,10 +765,12 @@ function updateIntMarkers() {
 
 // Initialize on page load
 function initForm() {
-  var checkbox = document.getElementById('resource_internal');
-  if (!checkbox) return;
+  var internalRadio = document.getElementById('resource_internal_true');
+  var externalRadio = document.getElementById('resource_internal_false');
+  if (!internalRadio || !externalRadio) return;
   
-  checkbox.onchange = toggleResourceType;
+  internalRadio.onchange = toggleResourceType;
+  externalRadio.onchange = toggleResourceType;
   toggleResourceType();
   initInternalLocations();
   updateExtNoLocMsg();
