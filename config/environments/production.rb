@@ -36,11 +36,15 @@ Rails.application.configure do
   config.active_storage.variant_processor = :mini_magick
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  # Can be used together with config.force_ssl for Strict-Transport-Security and secure cookies.
-  # config.assume_ssl = true
+  # Disabled by default - enable only if you need Rails to generate https:// URLs
+  config.assume_ssl = false
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # Disabled by default - your reverse proxy should handle SSL termination
+  config.force_ssl = false
+
+  # Don't require secure cookies when not forcing SSL
+  config.session_store :cookie_store, key: "_geowiki_session", secure: false
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new($stdout)
