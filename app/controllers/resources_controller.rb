@@ -3,7 +3,6 @@
 class ResourcesController < ApplicationController
   skip_before_action :authenticate_user!, only: [:index, :show, :feed]
   before_action :set_resource, only: [:show, :edit, :update, :destroy]
-  before_action :require_admin!, only: [:new, :create, :edit, :update, :destroy]
   before_action :check_admin_only_access, only: [:show]
   before_action :set_journable_user, only: [:create, :update, :destroy]
 

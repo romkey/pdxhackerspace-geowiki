@@ -115,7 +115,7 @@
             </td>
             <td>
               <%= link_to "View", resource, class: "btn btn-sm btn-outline-primary" %>
-              <% if current_user&.admin? %>
+              <% if current_user %>
                 <%= link_to "Edit", edit_resource_path(resource), class: "btn btn-sm btn-outline-secondary" %>
               <% end %>
             </td>

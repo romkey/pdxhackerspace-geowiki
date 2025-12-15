@@ -159,7 +159,7 @@
             <li class="nav-item">
               <%= link_to "Resources", resources_path, class: "nav-link" %>
             </li>
-            <% if current_user&.admin? %>
+            <% if current_user %>
               <li class="nav-item">
                 <%= link_to new_resource_path, class: "nav-link", title: "Add Resource" do %>
                   <i class="bi bi-plus-circle"></i> Resource
