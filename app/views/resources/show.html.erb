@@ -96,11 +96,7 @@
                   <%= idx + 1 %>
                 </span>
                 <div class="flex-grow-1">
-                  <% if location.label.present? %>
-                    <h6 class="mb-1"><%= location.label %></h6>
-                  <% else %>
-                    <h6 class="mb-1 text-muted">Location <%= idx + 1 %></h6>
-                  <% end %>
+                  <h6 class="mb-1"><%= location.label.presence || location.resource.name %></h6>
                   <% if location.resource != @resource %>
                     <small class="text-muted d-block mb-1">
                       <i class="bi bi-arrow-return-right"></i> <%= link_to location.resource.name, location.resource %>
@@ -158,7 +154,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         const locations = [
           <% all_external_locations.each_with_index do |loc, idx| %>
-            { lat: <%= loc.latitude %>, lng: <%= loc.longitude %>, label: "<%= j(loc.label.presence || "Location #{idx + 1}") %>", color: "<%= marker_colors[idx % marker_colors.length] %>", num: <%= idx + 1 %>, resource: "<%= j(loc.resource.name) %>", icon: "<%= j(loc.resource.icon.to_s) %>" }<%= idx < all_external_locations.count - 1 ? ',' : '' %>
+            { lat: <%= loc.latitude %>, lng: <%= loc.longitude %>, label: "<%= j(loc.label.presence || loc.resource.name) %>", color: "<%= marker_colors[idx % marker_colors.length] %>", resource: "<%= j(loc.resource.name) %>", icon: "<%= j(loc.resource.icon.to_s) %>", address: "<%= j(loc.address.to_s) %>", url: "<%= j(loc.url.to_s) %>" }<%= idx < all_external_locations.count - 1 ? ',' : '' %>
           <% end %>
         ];
         
@@ -218,9 +214,17 @@
             iconAnchor: [14, 14]
           });
           
+          let popupContent = `<strong>${loc.label}</strong>`;
+          if (loc.address) {
+            popupContent += `<br><small><i class="bi bi-geo-alt"></i> ${loc.address}</small>`;
+          }
+          if (loc.url) {
+            popupContent += `<br><a href="${loc.url}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Visit</a>`;
+          }
+          
           const marker = L.marker([loc.lat, loc.lng], { icon: icon })
             .addTo(map)
-            .bindPopup(`<strong>${loc.label}</strong><br><small>${loc.resource}</small><br><small>${loc.lat}, ${loc.lng}</small>`);
+            .bindPopup(popupContent);
           markers.push(marker);
         });
         

@@ -248,9 +248,16 @@
                   iconSize: [28, 28],
                   iconAnchor: [14, 14]
                 });
+                var popupContent = '<strong><%= j(loc.label.presence || resource.name) %></strong>';
+                <% if loc.address.present? %>
+                popupContent += '<br><small><i class="bi bi-geo-alt"></i> <%= j(loc.address) %></small>';
+                <% end %>
+                <% if loc.url.present? %>
+                popupContent += '<br><a href="<%= j(loc.url) %>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Visit</a>';
+                <% end %>
                 var marker = L.marker([<%= loc.latitude %>, <%= loc.longitude %>], { icon: icon })
                   .addTo(map)
-                  .bindPopup('<strong><%= j(resource.name) %></strong><br><small><%= loc.label.presence || resource.name %></small>');
+                  .bindPopup(popupContent);
                 markers.push(marker);
               })();
               <% end %>
