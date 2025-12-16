@@ -16,7 +16,7 @@ xml.rss version: "2.0", "xmlns:atom" => "http://www.w3.org/2005/Atom" do
         xml.pubDate resource.created_at.rfc2822
 
         description = []
-        description << (resource.internal? ? "Internal resource" : "External resource")
+        description << (resource.internal? ? "On-site resource" : "Off-site resource")
 
         if resource.internal? && resource.resource_locations.any?
           maps = resource.resource_locations.map { |loc| loc.map.name }.uniq

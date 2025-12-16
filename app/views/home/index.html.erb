@@ -11,13 +11,13 @@
 %>
 
 <% if @map || @top_external.any? %>
-  <%# Pills for Internal/External toggle %>
+  <%# Pills for On-site/Off-site toggle %>
   <div class="bg-dark py-2">
     <div class="container-fluid px-4">
       <ul class="nav nav-pills justify-content-center" id="resourceTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active px-4" id="internal-tab" data-bs-toggle="pill" data-bs-target="#internal-panel" type="button" role="tab">
-            <i class="bi bi-building"></i> Internal
+            <i class="bi bi-building"></i> On-site
             <% if @internal_count.positive? %>
               <span class="badge bg-secondary ms-1"><%= @internal_count %></span>
             <% end %>
@@ -25,7 +25,7 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link px-4" id="external-tab" data-bs-toggle="pill" data-bs-target="#external-panel" type="button" role="tab">
-            <i class="bi bi-geo-alt"></i> External
+            <i class="bi bi-geo-alt"></i> Off-site
             <% if @external_count.positive? %>
               <span class="badge bg-secondary ms-1"><%= @external_count %></span>
             <% end %>
@@ -39,7 +39,7 @@
     <%# INTERNAL TAB %>
     <div class="tab-pane fade show active" id="internal-panel" role="tabpanel">
       <% if @map %>
-        <%# Top Internal Resources bar %>
+        <%# Top On-site Resources bar %>
         <% if @top_internal.any? %>
           <div class="bg-dark py-3 border-top border-secondary">
             <div class="container-fluid px-4">
@@ -143,7 +143,7 @@
 
     <%# EXTERNAL TAB %>
     <div class="tab-pane fade" id="external-panel" role="tabpanel">
-      <%# Top External Resources bar %>
+      <%# Top Off-site Resources bar %>
       <% if @top_external.any? %>
         <div class="bg-dark py-3 border-top border-secondary">
           <div class="container-fluid px-4">
