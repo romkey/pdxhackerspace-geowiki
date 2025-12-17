@@ -56,12 +56,22 @@
         </tr>
       </thead>
       <tbody>
-        <% resources.each do |resource| %>
-          <% is_child = resource.parent.present? && @sort_column == 'name' && @sort_direction == 'asc' %>
+        <% resources.each do |item| %>
+          <%
+            # Support both hierarchical (hash with depth) and flat (plain resource) formats
+            if item.is_a?(Hash)
+              resource = item[:resource]
+              depth = item[:depth]
+            else
+              resource = item
+              depth = resource.parent.present? ? 1 : 0
+            end
+            is_child = depth > 0 && @sort_column == 'name' && @sort_direction == 'asc'
+          %>
           <tr class="<%= is_child ? 'child-row' : '' %>">
             <td>
               <% if is_child %>
-                <span class="text-muted ms-3 me-1"><i class="bi bi-arrow-return-right"></i></span>
+                <span class="text-muted me-1" style="margin-left: <%= (depth - 1) * 1.5 %>rem;"><i class="bi bi-arrow-return-right"></i></span>
               <% end %>
               <% if resource.icon.present? %>
                 <% if resource.icon.start_with?('bi-') %>
@@ -74,11 +84,6 @@
               <% if resource.admin_only? %>
                 <span class="badge bg-warning text-dark" title="Admin only">
                   <i class="bi bi-shield-lock"></i>
-                </span>
-              <% end %>
-              <% if resource.children.any? %>
-                <span class="badge bg-secondary" title="<%= resource.children.count %> child resources">
-                  <i class="bi bi-diagram-3"></i> <%= resource.children.count %>
                 </span>
               <% end %>
             </td>

@@ -109,13 +109,19 @@ class ResourcesController < ApplicationController
 
     result = []
     top_level.sort_by(&:name).each do |parent|
-      result << parent
-      # Add children sorted alphabetically
-      children = resources.select { |r| r.parent_id == parent.id }.sort_by(&:name)
-      result.concat(children)
+      add_resource_with_descendants(parent, resources, result, 0)
     end
 
     result
+  end
+
+  def add_resource_with_descendants(resource, all_resources, result, depth)
+    result << { resource: resource, depth: depth }
+    # Add children sorted alphabetically, then recurse
+    children = all_resources.select { |r| r.parent_id == resource.id }.sort_by(&:name)
+    children.each do |child|
+      add_resource_with_descendants(child, all_resources, result, depth + 1)
+    end
   end
 
   def sort_resources(resources)
