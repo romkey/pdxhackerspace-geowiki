@@ -33,6 +33,8 @@
             <% if resource.icon.present? %>
               <% if resource.icon.start_with?('bi-') %>
                 <i class="bi <%= resource.icon %>" style="font-size: 1.25rem;"></i>
+              <% elsif resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+                <i class="<%= resource.icon %>" style="font-size: 1.25rem;"></i>
               <% else %>
                 <span style="font-size: 1.25rem;"><%= resource.icon %></span>
               <% end %>
@@ -69,7 +71,18 @@
             <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-box-seam"><i class="bi bi-box-seam me-2"></i> Storage</a></li>
             <li><a class="dropdown-item icon-choice" href="#" data-icon="bi-gear"><i class="bi bi-gear me-2"></i> Equipment</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><h6 class="dropdown-header">Common Emojis</h6></li>
+            <li><h6 class="dropdown-header">Font Awesome</h6></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-kit-medical"><i class="fa-solid fa-kit-medical me-2"></i> First Aid Kit</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-fire-extinguisher"><i class="fa-solid fa-fire-extinguisher me-2"></i> Fire Extinguisher</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-toilet"><i class="fa-solid fa-toilet me-2"></i> Toilet</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-utensils"><i class="fa-solid fa-utensils me-2"></i> Restaurant</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-mug-hot"><i class="fa-solid fa-mug-hot me-2"></i> Coffee</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-car"><i class="fa-solid fa-car me-2"></i> Parking</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-gas-pump"><i class="fa-solid fa-gas-pump me-2"></i> Gas Station</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-screwdriver-wrench"><i class="fa-solid fa-screwdriver-wrench me-2"></i> Hardware</a></li>
+            <li><a class="dropdown-item icon-choice" href="#" data-icon="fa-solid fa-wheelchair"><i class="fa-solid fa-wheelchair me-2"></i> Accessible</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">Emojis</h6></li>
             <li><a class="dropdown-item icon-choice" href="#" data-icon="🏥">🏥 Hospital</a></li>
             <li><a class="dropdown-item icon-choice" href="#" data-icon="🚽">🚽 Toilet</a></li>
             <li><a class="dropdown-item icon-choice" href="#" data-icon="🔧">🔧 Wrench</a></li>
@@ -81,7 +94,7 @@
             <li><a class="dropdown-item icon-choice" href="#" data-icon=""><i class="bi bi-x-circle me-2 text-muted"></i> Clear Icon</a></li>
           </ul>
         </div>
-        <div class="form-text">Choose a Bootstrap Icon (bi-*) or enter an emoji. <a href="https://icons.getbootstrap.com/" target="_blank">Browse all icons</a></div>
+        <div class="form-text">Bootstrap Icons (bi-*), Font Awesome (fa-solid fa-*), or emoji. Browse: <a href="https://icons.getbootstrap.com/" target="_blank">Bootstrap</a> · <a href="https://fontawesome.com/search?o=r&m=free" target="_blank">Font Awesome</a></div>
       </div>
 
       <div class="mb-3">
@@ -803,6 +816,8 @@ function initIconPicker() {
       iconPreview.innerHTML = '<i class="bi bi-question-circle text-muted"></i>';
     } else if (icon.startsWith('bi-')) {
       iconPreview.innerHTML = '<i class="bi ' + icon + '" style="font-size: 1.25rem;"></i>';
+    } else if (icon.match(/^fa[srbl]?\s|^fa-/)) {
+      iconPreview.innerHTML = '<i class="' + icon + '" style="font-size: 1.25rem;"></i>';
     } else {
       iconPreview.innerHTML = '<span style="font-size: 1.25rem;">' + icon + '</span>';
     }

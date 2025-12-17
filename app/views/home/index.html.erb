@@ -58,6 +58,8 @@
                             <% if resource.icon.present? %>
                               <% if resource.icon.start_with?('bi-') %>
                                 <i class="bi <%= resource.icon %> me-1"></i>
+                              <% elsif resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+                                <i class="<%= resource.icon %> me-1"></i>
                               <% else %>
                                 <span class="me-1"><%= resource.icon %></span>
                               <% end %>
@@ -95,6 +97,8 @@
                         <% if resource.icon.present? %>
                           <% if resource.icon.start_with?('bi-') %>
                             <i class="bi <%= resource.icon %>"></i>
+                          <% elsif resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+                            <i class="<%= resource.icon %>"></i>
                           <% else %>
                             <%= resource.icon %>
                           <% end %>
@@ -162,6 +166,8 @@
                           <% if resource.icon.present? %>
                             <% if resource.icon.start_with?('bi-') %>
                               <i class="bi <%= resource.icon %> me-1"></i>
+                            <% elsif resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+                              <i class="<%= resource.icon %> me-1"></i>
                             <% else %>
                               <span class="me-1"><%= resource.icon %></span>
                             <% end %>
@@ -236,6 +242,8 @@
                 <% if resource.icon.present? %>
                   <% if resource.icon.start_with?('bi-') %>
                 var iconContent = '<i class="bi <%= resource.icon %>"></i>';
+                  <% elsif resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+                var iconContent = '<i class="<%= j(resource.icon) %>"></i>';
                   <% else %>
                 var iconContent = '<%= j(resource.icon) %>';
                   <% end %>

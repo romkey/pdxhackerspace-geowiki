@@ -29,6 +29,8 @@
         <% if @resource.icon.present? %>
           <% if @resource.icon.start_with?('bi-') %>
             <i class="bi <%= @resource.icon %> me-2"></i>
+          <% elsif @resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+            <i class="<%= @resource.icon %> me-2"></i>
           <% else %>
             <span class="me-2"><%= @resource.icon %></span>
           <% end %>
@@ -201,6 +203,8 @@
           let iconContent;
           if (loc.icon && loc.icon.startsWith('bi-')) {
             iconContent = `<i class="bi ${loc.icon}"></i>`;
+          } else if (loc.icon && loc.icon.match(/^fa[srbl]?\s|^fa-/)) {
+            iconContent = `<i class="${loc.icon}"></i>`;
           } else if (loc.icon) {
             iconContent = loc.icon;
           } else {
@@ -280,6 +284,8 @@
                   <% if location.resource.icon.present? %>
                     <% if location.resource.icon.start_with?('bi-') %>
                       <i class="bi <%= location.resource.icon %>"></i>
+                    <% elsif location.resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+                      <i class="<%= location.resource.icon %>"></i>
                     <% else %>
                       <%= location.resource.icon %>
                     <% end %>
@@ -348,6 +354,8 @@
                           <% if location.resource.icon.present? %>
                             <% if location.resource.icon.start_with?('bi-') %>
                               <i class="bi <%= location.resource.icon %>"></i>
+                            <% elsif location.resource.icon.match?(/^fa[srbl]?\s|^fa-/) %>
+                              <i class="<%= location.resource.icon %>"></i>
                             <% else %>
                               <%= location.resource.icon %>
                             <% end %>
