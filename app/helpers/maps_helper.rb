@@ -7,3 +7,4 @@ module MapsHelper
     channel.start_with?("#") ? channel : "##{channel}"
   end
 end
+

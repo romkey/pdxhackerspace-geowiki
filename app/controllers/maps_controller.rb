@@ -79,3 +79,4 @@ class MapsController < ApplicationController
     Map.current_user = current_user
   end
 end
+

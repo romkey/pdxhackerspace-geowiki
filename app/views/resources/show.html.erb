@@ -1,9 +1,10 @@
 <%
   marker_colors = ['#e74c3c', '#f39c12', '#27ae60', '#3498db', '#9b59b6', '#1abc9c', '#e67e22', '#2ecc71']
   
-  # Get all locations including from children (recursive), filtered by visibility
-  all_internal_locations = @resource.all_resource_locations(current_user)
-  all_external_locations = @resource.all_external_locations(current_user)
+  # Get all effective locations including from children (recursive), filtered by visibility
+  # These methods return [locations, inherited_from_resource_or_nil]
+  all_internal_locations, inherited_internal_from = @resource.all_effective_resource_locations(current_user)
+  all_external_locations, inherited_external_from = @resource.all_effective_external_locations(current_user)
   visible_children = @resource.visible_children(current_user)
   has_children = visible_children.any?
   visible_descendants_count = @resource.descendants(current_user).count
@@ -71,11 +72,19 @@
 
   <% if @resource.external? && all_external_locations.any? %>
     <%# External resource with locations: show OSM map with all markers %>
+    <% if inherited_external_from %>
+      <div class="alert alert-secondary mb-4">
+        <i class="bi bi-arrow-up-circle"></i>
+        This resource doesn't have its own location. Showing location from parent: <%= link_to inherited_external_from.name, inherited_external_from %>.
+      </div>
+    <% end %>
     <div class="card mb-4">
       <div class="card-header">
         <h5 class="mb-0">
           <i class="bi bi-geo-alt"></i> <%= pluralize(all_external_locations.count, 'Location') %>
-          <% if has_children %>
+          <% if inherited_external_from %>
+            <small class="text-muted">(from <%= link_to inherited_external_from.name, inherited_external_from %>)</small>
+          <% elsif has_children %>
             <small class="text-muted">(including child resources)</small>
           <% end %>
         </h5>
@@ -248,11 +257,19 @@
 
     <% if single_map && locations_by_map.any? %>
       <% map, locations = locations_by_map.first %>
+      <% if inherited_internal_from %>
+        <div class="alert alert-secondary mb-4">
+          <i class="bi bi-arrow-up-circle"></i>
+          This resource doesn't have its own map location. Showing location from parent: <%= link_to inherited_internal_from.name, inherited_internal_from %>.
+        </div>
+      <% end %>
       <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0">
             <i class="bi bi-map"></i> <%= link_to map.name, map %>
-            <% if has_children %>
+            <% if inherited_internal_from %>
+              <small class="text-muted">(from <%= link_to inherited_internal_from.name, inherited_internal_from %>)</small>
+            <% elsif has_children %>
               <small class="text-muted">(including child resources)</small>
             <% end %>
           </h5>
@@ -301,6 +318,12 @@
 
     <% elsif locations_by_map.any? %>
       <%# Multiple maps %>
+      <% if inherited_internal_from %>
+        <div class="alert alert-secondary mb-4">
+          <i class="bi bi-arrow-up-circle"></i>
+          This resource doesn't have its own map location. Showing location from parent: <%= link_to inherited_internal_from.name, inherited_internal_from %>.
+        </div>
+      <% end %>
       <div class="row">
         <div class="col-md-6">
           <% if @resource.resource_urls.any? %>
@@ -325,7 +348,9 @@
             <div class="card-header">
               <h5 class="mb-0">
                 <i class="bi bi-map"></i> Map Locations (<%= all_internal_locations.count %> on <%= locations_by_map.count %> <%= "map".pluralize(locations_by_map.count) %>)
-                <% if has_children %>
+                <% if inherited_internal_from %>
+                  <small class="text-muted d-block">(from <%= link_to inherited_internal_from.name, inherited_internal_from %>)</small>
+                <% elsif has_children %>
                   <small class="text-muted d-block">(including child resources)</small>
                 <% end %>
               </h5>
@@ -463,3 +488,4 @@
     <%= link_to "← Back to Resources", resources_path, class: "btn btn-outline-secondary" %>
   </div>
 </div>
+

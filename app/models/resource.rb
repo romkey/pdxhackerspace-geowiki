@@ -60,6 +60,46 @@ class Resource < ApplicationRecord
     self_and_descendants(user).flat_map(&:resource_external_locations)
   end
 
+  # Get effective internal locations - own locations, or inherit from parent if none
+  # Returns [locations, inherited_from_resource_or_nil]
+  def effective_resource_locations(user = nil)
+    if resource_locations.any?
+      [resource_locations, nil]
+    elsif parent
+      parent_locations, _ = parent.effective_resource_locations(user)
+      [parent_locations, parent]
+    else
+      [[], nil]
+    end
+  end
+
+  # Get effective external locations - own locations, or inherit from parent if none
+  # Returns [locations, inherited_from_resource_or_nil]
+  def effective_external_locations(user = nil)
+    if resource_external_locations.any?
+      [resource_external_locations, nil]
+    elsif parent
+      parent_locations, _ = parent.effective_external_locations(user)
+      [parent_locations, parent]
+    else
+      [[], nil]
+    end
+  end
+
+  # Get all effective internal locations (effective + descendants)
+  def all_effective_resource_locations(user = nil)
+    own_effective, inherited_from = effective_resource_locations(user)
+    descendant_locations = descendants(user).flat_map(&:resource_locations)
+    [own_effective + descendant_locations, inherited_from]
+  end
+
+  # Get all effective external locations (effective + descendants)
+  def all_effective_external_locations(user = nil)
+    own_effective, inherited_from = effective_external_locations(user)
+    descendant_locations = descendants(user).flat_map(&:resource_external_locations)
+    [own_effective + descendant_locations, inherited_from]
+  end
+
   # Get breadcrumb trail from root to this resource
   def ancestors
     parent ? parent.ancestors + [parent] : []
@@ -70,3 +110,4 @@ class Resource < ApplicationRecord
     parent ? parent.root : self
   end
 end
+

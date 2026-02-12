@@ -143,3 +143,4 @@ class ResourcesController < ApplicationController
     @sort_direction == "desc" ? sorted.reverse : sorted
   end
 end
+
