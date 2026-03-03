@@ -23,12 +23,18 @@ Rails.application.routes.draw do
     member do
       get :image_url
     end
+    resources :rooms, except: [:show] do
+      collection do
+        get :editor
+      end
+    end
   end
 
   # Resources
   resources :resources do
     collection do
       get :feed, defaults: { format: :rss }
+      get :export, defaults: { format: :json }
     end
   end
 

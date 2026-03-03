@@ -23,6 +23,7 @@
         <%= link_to "Edit", edit_map_path(@map), class: "btn btn-outline-secondary" %>
       <% end %>
       <% if current_user&.admin? %>
+        <%= link_to "Room Editor", editor_map_rooms_path(@map), class: "btn btn-outline-info" %>
         <%= button_to "Delete", @map, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-outline-danger", form: { style: "display: inline;" } %>
       <% end %>
       <% if current_user %>
@@ -100,6 +101,28 @@
         </div>
       <% end %>
 
+      <% if @map.rooms.any? %>
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-grid-3x3"></i> Rooms</h5>
+            <% if current_user&.admin? %>
+              <%= link_to "Edit", editor_map_rooms_path(@map), class: "btn btn-sm btn-outline-secondary" %>
+            <% end %>
+          </div>
+          <ul class="list-group list-group-flush">
+            <% @map.rooms.order(:name).each do |room| %>
+              <li class="list-group-item">
+                <strong><%= room.name %></strong>
+                <br>
+                <small class="text-muted">
+                  <%= number_with_precision(room.width_percent, precision: 1) %>% × <%= number_with_precision(room.height_percent, precision: 1) %>%
+                </small>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
       <% if @map.resource_locations.any? %>
         <div class="card">
           <div class="card-header">
@@ -111,7 +134,13 @@
                 <div class="d-flex justify-content-between align-items-center">
                   <%= link_to location.resource.name, location.resource %>
                 </div>
-                <small class="text-muted">Position: (<%= number_with_precision(location.x, precision: 1) %>%, <%= number_with_precision(location.y, precision: 1) %>%)</small>
+                <small class="text-muted">
+                  <% if location.room %>
+                    <%= location.position_description(include_distance: @map.has_scale?) %>
+                  <% else %>
+                    Position: (<%= number_with_precision(location.x, precision: 1) %>%, <%= number_with_precision(location.y, precision: 1) %>%)
+                  <% end %>
+                </small>
               </li>
             <% end %>
           </ul>

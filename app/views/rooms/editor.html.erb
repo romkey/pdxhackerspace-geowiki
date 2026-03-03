@@ -1,0 +1,272 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1><i class="bi bi-grid-3x3"></i> Room Editor: <%= @map.name %></h1>
+      <p class="text-muted mb-0">Click two corners on the map to define a room rectangle.</p>
+    </div>
+    <div>
+      <%= link_to "Back to Map", @map, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-map"></i> Map</span>
+          <div>
+            <button type="button" class="btn btn-sm btn-outline-danger" id="cancel-room" style="display: none;">
+              <i class="bi bi-x-lg"></i> Cancel
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <% if @map.image.attached? %>
+            <div class="position-relative" id="map-container" style="cursor: crosshair;">
+              <%= image_tag @map.image, class: "img-fluid w-100", id: "map-image" %>
+              
+              <%# Existing rooms %>
+              <% @rooms.each do |room| %>
+                <div class="room-overlay position-absolute" 
+                     data-room-id="<%= room.id %>"
+                     style="left: <%= room.left %>%; top: <%= room.top %>%; width: <%= room.width_percent %>%; height: <%= room.height_percent %>%; border: 2px solid #3498db; background: rgba(52, 152, 219, 0.2); pointer-events: none;">
+                  <span class="position-absolute bg-primary text-white px-2 py-1 rounded" style="top: 2px; left: 2px; font-size: 12px;">
+                    <%= room.name %>
+                  </span>
+                </div>
+              <% end %>
+              
+              <%# First click marker %>
+              <div id="first-point" class="position-absolute" style="display: none; width: 12px; height: 12px; background: #e74c3c; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); pointer-events: none; z-index: 100;"></div>
+              
+              <%# Preview rectangle %>
+              <div id="preview-rect" class="position-absolute" style="display: none; border: 2px dashed #e74c3c; background: rgba(231, 76, 60, 0.2); pointer-events: none; z-index: 99;"></div>
+            </div>
+          <% else %>
+            <div class="alert alert-warning m-3">
+              <i class="bi bi-exclamation-triangle"></i> This map has no image attached.
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Scale settings %>
+      <div class="card mb-4">
+        <div class="card-header">
+          <i class="bi bi-rulers"></i> Map Scale
+        </div>
+        <div class="card-body">
+          <%= form_with url: map_path(@map), method: :patch, local: true, class: "row g-3 align-items-end" do |f| %>
+            <div class="col-md-4">
+              <label class="form-label">Reference distance on map (%)</label>
+              <%= f.number_field :scale_pixels, value: @map.scale_pixels, class: "form-control", step: "0.001", min: "0.001", max: "100", placeholder: "e.g., 10" %>
+              <small class="text-muted">Percentage width of a known distance</small>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Real-world value</label>
+              <%= f.number_field :scale_real_value, value: @map.scale_real_value, class: "form-control", step: "0.1", min: "0.1", placeholder: "e.g., 20" %>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Unit</label>
+              <%= f.select :scale_unit, [["feet", "feet"], ["meters", "meters"], ["inches", "inches"], ["yards", "yards"]], {}, class: "form-select" %>
+            </div>
+            <div class="col-md-2">
+              <%= f.submit "Save Scale", class: "btn btn-primary w-100" %>
+            </div>
+          <% end %>
+          <% if @map.has_scale? %>
+            <div class="alert alert-success mt-3 mb-0">
+              <i class="bi bi-check-circle"></i> Scale configured: <%= @map.scale_pixels %>% = <%= @map.scale_real_value %> <%= @map.scale_unit %>
+            </div>
+          <% else %>
+            <div class="alert alert-info mt-3 mb-0">
+              <i class="bi bi-info-circle"></i> Set a scale to enable distance calculations. Measure a known distance on your map (as % of width) and enter the real-world measurement.
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <%# Room creation form %>
+      <div class="card mb-4" id="room-form-card" style="display: none;">
+        <div class="card-header bg-success text-white">
+          <i class="bi bi-plus-lg"></i> New Room
+        </div>
+        <div class="card-body">
+          <%= form_with url: map_rooms_path(@map), method: :post, local: true, id: "room-form" do |f| %>
+            <div class="mb-3">
+              <label class="form-label">Room Name</label>
+              <%= f.text_field :name, class: "form-control", id: "room-name", required: true, placeholder: "e.g., Workshop" %>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Corner 1</label>
+                <div class="input-group input-group-sm">
+                  <%= f.number_field :x1, class: "form-control", id: "room-x1", step: "0.001", readonly: true %>
+                  <%= f.number_field :y1, class: "form-control", id: "room-y1", step: "0.001", readonly: true %>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Corner 2</label>
+                <div class="input-group input-group-sm">
+                  <%= f.number_field :x2, class: "form-control", id: "room-x2", step: "0.001", readonly: true %>
+                  <%= f.number_field :y2, class: "form-control", id: "room-y2", step: "0.001", readonly: true %>
+                </div>
+              </div>
+            </div>
+            <div class="d-grid gap-2">
+              <%= f.submit "Create Room", class: "btn btn-success" %>
+              <button type="button" class="btn btn-outline-secondary" id="reset-form">Reset</button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Instructions %>
+      <div class="card mb-4" id="instructions-card">
+        <div class="card-header">
+          <i class="bi bi-question-circle"></i> Instructions
+        </div>
+        <div class="card-body">
+          <ol class="mb-0">
+            <li class="mb-2">Click on the map to set the first corner of the room</li>
+            <li class="mb-2">Click again to set the opposite corner</li>
+            <li class="mb-2">Enter a name for the room</li>
+            <li>Click "Create Room" to save</li>
+          </ol>
+        </div>
+      </div>
+
+      <%# Existing rooms list %>
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-list"></i> Rooms (<%= @rooms.count %>)</span>
+        </div>
+        <ul class="list-group list-group-flush" id="rooms-list">
+          <% if @rooms.empty? %>
+            <li class="list-group-item text-muted">No rooms defined yet.</li>
+          <% else %>
+            <% @rooms.each do |room| %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong><%= room.name %></strong>
+                  <br>
+                  <small class="text-muted">
+                    (<%= number_with_precision(room.left, precision: 1) %>%, <%= number_with_precision(room.top, precision: 1) %>%) to
+                    (<%= number_with_precision(room.right, precision: 1) %>%, <%= number_with_precision(room.bottom, precision: 1) %>%)
+                  </small>
+                </div>
+                <%= button_to map_room_path(@map, room), method: :delete, data: { confirm: "Delete room '#{room.name}'?" }, class: "btn btn-sm btn-outline-danger", form: { style: "display: inline;" } do %>
+                  <i class="bi bi-trash"></i>
+                <% end %>
+              </li>
+            <% end %>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const mapContainer = document.getElementById('map-container');
+  const mapImage = document.getElementById('map-image');
+  const firstPoint = document.getElementById('first-point');
+  const previewRect = document.getElementById('preview-rect');
+  const roomFormCard = document.getElementById('room-form-card');
+  const instructionsCard = document.getElementById('instructions-card');
+  const cancelBtn = document.getElementById('cancel-room');
+  const resetBtn = document.getElementById('reset-form');
+  
+  let clickCount = 0;
+  let point1 = null;
+  let point2 = null;
+
+  function getPercentCoords(e) {
+    const rect = mapImage.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    return { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) };
+  }
+
+  function resetState() {
+    clickCount = 0;
+    point1 = null;
+    point2 = null;
+    firstPoint.style.display = 'none';
+    previewRect.style.display = 'none';
+    roomFormCard.style.display = 'none';
+    instructionsCard.style.display = 'block';
+    cancelBtn.style.display = 'none';
+    document.getElementById('room-name').value = '';
+    document.getElementById('room-x1').value = '';
+    document.getElementById('room-y1').value = '';
+    document.getElementById('room-x2').value = '';
+    document.getElementById('room-y2').value = '';
+  }
+
+  function updatePreviewRect() {
+    if (!point1 || !point2) return;
+    
+    const left = Math.min(point1.x, point2.x);
+    const top = Math.min(point1.y, point2.y);
+    const width = Math.abs(point2.x - point1.x);
+    const height = Math.abs(point2.y - point1.y);
+    
+    previewRect.style.left = left + '%';
+    previewRect.style.top = top + '%';
+    previewRect.style.width = width + '%';
+    previewRect.style.height = height + '%';
+    previewRect.style.display = 'block';
+  }
+
+  if (mapContainer) {
+    mapContainer.addEventListener('click', function(e) {
+      if (e.target !== mapImage) return;
+      
+      const coords = getPercentCoords(e);
+      
+      if (clickCount === 0) {
+        point1 = coords;
+        firstPoint.style.left = coords.x + '%';
+        firstPoint.style.top = coords.y + '%';
+        firstPoint.style.display = 'block';
+        cancelBtn.style.display = 'inline-block';
+        clickCount = 1;
+        
+        document.getElementById('room-x1').value = coords.x.toFixed(3);
+        document.getElementById('room-y1').value = coords.y.toFixed(3);
+      } else if (clickCount === 1) {
+        point2 = coords;
+        updatePreviewRect();
+        firstPoint.style.display = 'none';
+        
+        document.getElementById('room-x2').value = coords.x.toFixed(3);
+        document.getElementById('room-y2').value = coords.y.toFixed(3);
+        
+        roomFormCard.style.display = 'block';
+        instructionsCard.style.display = 'none';
+        document.getElementById('room-name').focus();
+        clickCount = 2;
+      }
+    });
+
+    mapContainer.addEventListener('mousemove', function(e) {
+      if (clickCount === 1 && point1) {
+        point2 = getPercentCoords(e);
+        updatePreviewRect();
+      }
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', resetState);
+  }
+  
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetState);
+  }
+});
+</script>

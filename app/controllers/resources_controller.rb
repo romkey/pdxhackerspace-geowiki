@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ResourcesController < ApplicationController
-  skip_before_action :authenticate_user!, only: [:index, :show, :feed]
+  skip_before_action :authenticate_user!, only: [:index, :show, :feed, :export]
   before_action :set_resource, only: [:show, :edit, :update, :destroy]
   before_action :check_admin_only_access, only: [:show]
   before_action :set_journable_user, only: [:create, :update, :destroy]
@@ -32,6 +32,21 @@ class ResourcesController < ApplicationController
       .limit(30)
     respond_to do |format|
       format.rss { render layout: false }
+    end
+  end
+
+  def export
+    resources = Resource.internal.public_only
+                        .includes(:parent, :resource_urls, resource_locations: :map)
+
+    export_data = {
+      generated_at: Time.current.iso8601,
+      count: resources.count,
+      resources: resources.map { |r| r.to_export_hash(include_distance: true) }
+    }
+
+    respond_to do |format|
+      format.json { render json: export_data }
     end
   end
 

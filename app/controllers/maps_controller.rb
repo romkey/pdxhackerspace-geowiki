@@ -72,7 +72,7 @@ class MapsController < ApplicationController
   end
 
   def map_params
-    params.expect(map: [:name, :slack_channel, :parent_id, :image, :is_default, { maintainer_ids: [] }])
+    params.expect(map: [:name, :slack_channel, :parent_id, :image, :is_default, :scale_pixels, :scale_real_value, :scale_unit, { maintainer_ids: [] }])
   end
 
   def set_journable_user

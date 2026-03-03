@@ -14,6 +14,8 @@ class Map < ApplicationRecord
   has_many :resource_locations, dependent: :destroy
   has_many :resources, through: :resource_locations
 
+  has_many :rooms, dependent: :destroy
+
   validates :name, presence: true
   validates :slack_channel, format: { with: /\A#?[\w-]+\z/, allow_blank: true }
   validates :image,
@@ -53,6 +55,27 @@ class Map < ApplicationRecord
     return true if user.admin?
 
     maintainer?(user)
+  end
+
+  def has_scale?
+    scale_pixels.present? && scale_real_value.present? && scale_pixels > 0
+  end
+
+  def percent_to_real_distance(percent)
+    return nil unless has_scale?
+
+    (percent / scale_pixels) * scale_real_value
+  end
+
+  def room_for_point(x, y)
+    rooms.find { |room| room.contains_point?(x, y) }
+  end
+
+  def position_description_for(x, y, include_distance: true)
+    room = room_for_point(x, y)
+    return nil unless room
+
+    room.position_description_for(x, y, include_distance: include_distance)
   end
 
   private

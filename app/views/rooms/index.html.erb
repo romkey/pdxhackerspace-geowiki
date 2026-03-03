@@ -1,0 +1,43 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1><i class="bi bi-grid-3x3"></i> Rooms: <%= @map.name %></h1>
+      <p class="text-muted mb-0"><%= pluralize(@rooms.count, 'room') %> defined</p>
+    </div>
+    <div>
+      <%= link_to "Room Editor", editor_map_rooms_path(@map), class: "btn btn-primary" %>
+      <%= link_to "Back to Map", @map, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <% if @rooms.empty? %>
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i> No rooms defined yet. 
+      <%= link_to "Open the Room Editor", editor_map_rooms_path(@map) %> to start defining rooms.
+    </div>
+  <% else %>
+    <div class="row">
+      <% @rooms.each do |room| %>
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title"><%= room.name %></h5>
+              <p class="text-muted small mb-2">
+                Position: (<%= number_with_precision(room.left, precision: 1) %>%, <%= number_with_precision(room.top, precision: 1) %>%) to 
+                (<%= number_with_precision(room.right, precision: 1) %>%, <%= number_with_precision(room.bottom, precision: 1) %>%)
+              </p>
+              <p class="text-muted small mb-0">
+                Size: <%= number_with_precision(room.width_percent, precision: 1) %>% × <%= number_with_precision(room.height_percent, precision: 1) %>%
+              </p>
+            </div>
+            <div class="card-footer bg-transparent">
+              <%= button_to map_room_path(@map, room), method: :delete, data: { confirm: "Delete room '#{room.name}'?" }, class: "btn btn-sm btn-outline-danger" do %>
+                <i class="bi bi-trash"></i> Delete
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

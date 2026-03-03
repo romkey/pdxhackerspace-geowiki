@@ -109,5 +109,36 @@ class Resource < ApplicationRecord
   def root
     parent ? parent.root : self
   end
+
+  # Get position descriptions for all internal locations
+  def position_descriptions(include_distance: true)
+    resource_locations.filter_map do |loc|
+      desc = loc.position_description(include_distance: include_distance)
+      { map: loc.map.name, description: desc, x: loc.x, y: loc.y } if desc
+    end
+  end
+
+  # Get a single combined position description (for resources in one room)
+  def primary_position_description(include_distance: true)
+    position_descriptions(include_distance: include_distance).first&.dig(:description)
+  end
+
+  # Export resource data as a hash for JSON
+  def to_export_hash(include_distance: true)
+    {
+      id: id,
+      name: name,
+      description: description,
+      icon: icon,
+      internal: internal?,
+      admin_only: admin_only?,
+      parent_id: parent_id,
+      parent_name: parent&.name,
+      urls: resource_urls.map { |u| { label: u.label, url: u.url } },
+      locations: position_descriptions(include_distance: include_distance),
+      view_count: view_count,
+      updated_at: updated_at.iso8601
+    }
+  end
 end
 
