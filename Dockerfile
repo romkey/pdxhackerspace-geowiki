@@ -35,6 +35,6 @@ RUN mkdir -p tmp/pids log storage tmp/storage
 # Expose port
 EXPOSE 3000
 
-# Start the server
-CMD ["rails", "server", "-b", "0.0.0.0"]
+# Start the server (migrations run via docker-compose command override)
+CMD ["bash", "-c", "rm -f tmp/pids/server.pid && bundle exec rails db:prepare && rails server -b 0.0.0.0"]
 
