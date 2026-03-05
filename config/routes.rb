@@ -47,6 +47,9 @@ Rails.application.routes.draw do
   # Search
   get "search", to: "search#index", as: :search
 
+  # RAG export
+  get "rag", to: "rag#show", as: :rag, defaults: { format: :json }
+
   # Defines the root path route ("/")
   root "home#index"
 end
