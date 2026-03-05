@@ -31,12 +31,13 @@ class RagController < ApplicationController
       updated_at: resource.updated_at.iso8601
     }
 
-    if resource.parent
+    if resource.parent && !resource.parent.admin_only?
       base[:parent] = { id: resource.parent_id, name: resource.parent.name }
     end
 
-    if resource.children.any?
-      base[:children] = resource.children.map { |c| { id: c.id, name: c.name } }
+    public_children = resource.children.where(admin_only: false)
+    if public_children.any?
+      base[:children] = public_children.map { |c| { id: c.id, name: c.name } }
     end
 
     if resource.resource_urls.any?
