@@ -56,7 +56,7 @@
           <i class="bi bi-rulers"></i> Map Scale
         </div>
         <div class="card-body">
-          <%= form_with url: map_path(@map), method: :patch, local: true, class: "row g-3 align-items-end" do |f| %>
+          <%= form_with url: map_path(@map), scope: :map, method: :patch, local: true, class: "row g-3 align-items-end" do |f| %>
             <div class="col-md-4">
               <label class="form-label">Reference distance on map (%)</label>
               <%= f.number_field :scale_pixels, value: @map.scale_pixels, class: "form-control", step: "0.001", min: "0.001", max: "100", placeholder: "e.g., 10" %>
