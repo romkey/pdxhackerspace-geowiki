@@ -14,7 +14,7 @@ gem "omniauth-rails_csrf_protection", "~> 1.0"
 gem "pg", "~> 1.5"
 gem "propshaft"
 gem "puma", "~> 7.2"
-gem "rails", "8.1.1"
+gem "rails", "8.1.2"
 gem "stimulus-rails"
 gem "turbo-rails"
 
