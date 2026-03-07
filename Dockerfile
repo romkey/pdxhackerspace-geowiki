@@ -20,10 +20,10 @@ WORKDIR /app
 # Install bundler
 RUN gem install bundler
 
-# Copy Gemfile
-COPY Gemfile ./
+# Copy Gemfile and Gemfile.lock
+COPY Gemfile Gemfile.lock ./
 
-# Install gems (Gemfile.lock will be generated if it doesn't exist)
+# Install gems
 RUN bundle install
 
 # Copy the rest of the application

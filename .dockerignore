@@ -2,7 +2,6 @@
 .gitignore
 .env
 .env.*
-Gemfile.lock
 *.log
 tmp/
 log/
