@@ -10,6 +10,9 @@ on:
   schedule:
     - cron: '0 0 * * 1'  # Weekly on Mondays
 
+permissions:
+  contents: read
+
 jobs:
   bundle-audit:
     runs-on: ubuntu-latest

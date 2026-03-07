@@ -303,6 +303,17 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
+// HTML escape helper to prevent XSS
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Global variables for external locations
 var osmMap = null;
 var extLocationIndex = <%= resource.resource_external_locations.size %>;
@@ -379,27 +390,28 @@ window.addExtLocation = function(lat, lng) {
   var msg = document.getElementById('no-external-locations-message');
   
   var idx = Date.now();
+  var safeIdx = escapeHtml(idx);
   var html = `
-    <div class="external-location-fields card mb-3" data-ext-index="${idx}">
+    <div class="external-location-fields card mb-3" data-ext-index="${safeIdx}">
       <div class="card-body py-2">
         <div class="row align-items-end mb-2">
           <div class="col-md-2">
             <label class="form-label small">Latitude</label>
-            <input type="number" name="resource[resource_external_locations_attributes][${idx}][latitude]" 
+            <input type="number" name="resource[resource_external_locations_attributes][${safeIdx}][latitude]" 
                    class="form-control form-control-sm ext-lat" step="0.0000001" value="${lat !== undefined ? lat.toFixed(7) : ''}">
           </div>
           <div class="col-md-2">
             <label class="form-label small">Longitude</label>
-            <input type="number" name="resource[resource_external_locations_attributes][${idx}][longitude]" 
+            <input type="number" name="resource[resource_external_locations_attributes][${safeIdx}][longitude]" 
                    class="form-control form-control-sm ext-lng" step="0.0000001" value="${lng !== undefined ? lng.toFixed(7) : ''}">
           </div>
           <div class="col-md-6">
             <label class="form-label small">Address <span class="text-muted">(auto-filled)</span></label>
-            <input type="text" name="resource[resource_external_locations_attributes][${idx}][address]" 
+            <input type="text" name="resource[resource_external_locations_attributes][${safeIdx}][address]" 
                    class="form-control form-control-sm ext-address" placeholder="Loading address...">
           </div>
           <div class="col-md-2">
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeExtLocation('${idx}')">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeExtLocation('${safeIdx}')">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -407,12 +419,12 @@ window.addExtLocation = function(lat, lng) {
         <div class="row">
           <div class="col-md-5">
             <label class="form-label small">URL (optional)</label>
-            <input type="url" name="resource[resource_external_locations_attributes][${idx}][url]" 
+            <input type="url" name="resource[resource_external_locations_attributes][${safeIdx}][url]" 
                    class="form-control form-control-sm" placeholder="https://order.example.com">
           </div>
           <div class="col-md-5">
             <label class="form-label small">Label (optional)</label>
-            <input type="text" name="resource[resource_external_locations_attributes][${idx}][label]" 
+            <input type="text" name="resource[resource_external_locations_attributes][${safeIdx}][label]" 
                    class="form-control form-control-sm" placeholder="Downtown location">
           </div>
         </div>
@@ -670,20 +682,23 @@ function initInternalLocations() {
 function addInternalLocation(mapId, mapName, x, y) {
   var list = document.getElementById('internal-locations-list');
   var idx = Date.now();
+  var safeIdx = escapeHtml(idx);
+  var safeMapId = escapeHtml(mapId);
+  var safeMapName = escapeHtml(mapName);
   
   var html = `
-    <div class="internal-location-entry d-flex align-items-center gap-2 mb-2 p-2 border rounded" data-location-index="${idx}">
+    <div class="internal-location-entry d-flex align-items-center gap-2 mb-2 p-2 border rounded" data-location-index="${safeIdx}">
       <span class="badge bg-danger location-number"></span>
-      <input type="hidden" name="resource[resource_locations_attributes][${idx}][map_id]" class="location-map-id" value="${mapId}" data-location-index="${idx}">
-      <span class="location-map-name text-muted small">${mapName}</span>
+      <input type="hidden" name="resource[resource_locations_attributes][${safeIdx}][map_id]" class="location-map-id" value="${safeMapId}" data-location-index="${safeIdx}">
+      <span class="location-map-name text-muted small">${safeMapName}</span>
       <span class="flex-grow-1">
         (<span class="location-x-display">${x.toFixed(1)}</span>%, 
          <span class="location-y-display">${y.toFixed(1)}</span>%)
       </span>
-      <input type="hidden" name="resource[resource_locations_attributes][${idx}][x]" class="location-x" value="${x.toFixed(3)}" data-location-index="${idx}">
-      <input type="hidden" name="resource[resource_locations_attributes][${idx}][y]" class="location-y" value="${y.toFixed(3)}" data-location-index="${idx}">
-      <input type="hidden" name="resource[resource_locations_attributes][${idx}][_destroy]" class="destroy-field" value="false" data-location-index="${idx}">
-      <button type="button" class="btn btn-sm btn-outline-danger remove-int-location-btn" data-location-index="${idx}">
+      <input type="hidden" name="resource[resource_locations_attributes][${safeIdx}][x]" class="location-x" value="${x.toFixed(3)}" data-location-index="${safeIdx}">
+      <input type="hidden" name="resource[resource_locations_attributes][${safeIdx}][y]" class="location-y" value="${y.toFixed(3)}" data-location-index="${safeIdx}">
+      <input type="hidden" name="resource[resource_locations_attributes][${safeIdx}][_destroy]" class="destroy-field" value="false" data-location-index="${safeIdx}">
+      <button type="button" class="btn btn-sm btn-outline-danger remove-int-location-btn" data-location-index="${safeIdx}">
         <i class="bi bi-trash"></i>
       </button>
     </div>
@@ -812,14 +827,26 @@ function initIconPicker() {
   });
   
   function updateIconPreview(icon) {
+    iconPreview.innerHTML = '';
     if (!icon) {
-      iconPreview.innerHTML = '<i class="bi bi-question-circle text-muted"></i>';
+      var placeholder = document.createElement('i');
+      placeholder.className = 'bi bi-question-circle text-muted';
+      iconPreview.appendChild(placeholder);
     } else if (icon.startsWith('bi-')) {
-      iconPreview.innerHTML = '<i class="bi ' + icon + '" style="font-size: 1.25rem;"></i>';
+      var el = document.createElement('i');
+      el.className = 'bi ' + escapeHtml(icon);
+      el.style.fontSize = '1.25rem';
+      iconPreview.appendChild(el);
     } else if (icon.match(/^fa[srbl]?\s|^fa-/)) {
-      iconPreview.innerHTML = '<i class="' + icon + '" style="font-size: 1.25rem;"></i>';
+      var el = document.createElement('i');
+      el.className = escapeHtml(icon);
+      el.style.fontSize = '1.25rem';
+      iconPreview.appendChild(el);
     } else {
-      iconPreview.innerHTML = '<span style="font-size: 1.25rem;">' + icon + '</span>';
+      var span = document.createElement('span');
+      span.style.fontSize = '1.25rem';
+      span.textContent = icon;
+      iconPreview.appendChild(span);
     }
   }
 }

@@ -92,7 +92,7 @@ class SessionsController < ApplicationController
     user = User.find_or_initialize_by(email: email)
     user.name = name
     user.is_admin = is_admin
-    user.password = password
+    user.password = password # Safe: has_secure_password hashes on assignment (CodeQL false positive)
     user.provider = nil
     user.uid = nil
     user.save!
