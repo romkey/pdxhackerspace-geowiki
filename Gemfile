@@ -18,6 +18,9 @@ gem "rails", "8.1.2"
 gem "stimulus-rails"
 gem "turbo-rails"
 
+gem "sentry-ruby"
+gem "sentry-rails"
+
 group :development, :test do
   gem "debug", platforms: [:mri, :windows], require: "debug/prelude"
   gem "factory_bot_rails"

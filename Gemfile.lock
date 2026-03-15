@@ -319,6 +319,13 @@ GEM
       ffi (~> 1.12)
       logger
     securerandom (0.4.1)
+    sentry-rails (6.4.1)
+      railties (>= 5.2.0)
+      sentry-ruby (~> 6.4.1)
+    sentry-ruby (6.4.1)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      logger
     snaky_hash (2.0.3)
       hashie (>= 0.1.0, < 6)
       version_gem (>= 1.1.8, < 3)
@@ -374,6 +381,8 @@ DEPENDENCIES
   rubocop
   rubocop-rails
   rubocop-rspec
+  sentry-rails
+  sentry-ruby
   stimulus-rails
   turbo-rails
   web-console (>= 4.2.0)
