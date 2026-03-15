@@ -20,6 +20,7 @@ gem "turbo-rails"
 
 gem "sentry-ruby"
 gem "sentry-rails"
+gem "stackprof"
 
 group :development, :test do
   gem "debug", platforms: [:mri, :windows], require: "debug/prelude"

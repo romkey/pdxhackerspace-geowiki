@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2024_12_14_000018) do
+ActiveRecord::Schema[8.1].define(version: 2024_12_14_000020) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,6 +71,9 @@ ActiveRecord::Schema[8.1].define(version: 2024_12_14_000018) do
     t.boolean "is_default", default: false, null: false
     t.string "name", null: false
     t.bigint "parent_id"
+    t.decimal "scale_pixels", precision: 10, scale: 3
+    t.decimal "scale_real_value", precision: 10, scale: 3
+    t.string "scale_unit", default: "feet"
     t.string "slack_channel"
     t.datetime "updated_at", null: false
     t.index ["is_default"], name: "index_maps_on_is_default", unique: true, where: "(is_default = true)"
@@ -131,6 +134,19 @@ ActiveRecord::Schema[8.1].define(version: 2024_12_14_000018) do
     t.index ["view_count"], name: "index_resources_on_view_count"
   end
 
+  create_table "rooms", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "map_id", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "x1", precision: 6, scale: 3, null: false
+    t.decimal "x2", precision: 6, scale: 3, null: false
+    t.decimal "y1", precision: 6, scale: 3, null: false
+    t.decimal "y2", precision: 6, scale: 3, null: false
+    t.index ["map_id", "name"], name: "index_rooms_on_map_id_and_name", unique: true
+    t.index ["map_id"], name: "index_rooms_on_map_id"
+  end
+
   create_table "site_configs", force: :cascade do |t|
     t.text "address"
     t.datetime "created_at", null: false
@@ -164,4 +180,5 @@ ActiveRecord::Schema[8.1].define(version: 2024_12_14_000018) do
   add_foreign_key "resource_locations", "resources"
   add_foreign_key "resource_urls", "resources"
   add_foreign_key "resources", "resources", column: "parent_id"
+  add_foreign_key "rooms", "maps"
 end
