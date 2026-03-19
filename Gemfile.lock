@@ -199,7 +199,7 @@ GEM
     omniauth-oauth2 (1.9.0)
       oauth2 (>= 2.0.2, < 3)
       omniauth (~> 2.0)
-    omniauth-rails_csrf_protection (1.0.2)
+    omniauth-rails_csrf_protection (2.0.1)
       actionpack (>= 4.2)
       omniauth (~> 2.0)
     parallel (1.27.0)
@@ -373,7 +373,7 @@ DEPENDENCIES
   jbuilder (~> 2.13)
   omniauth (~> 2.1)
   omniauth-oauth2 (~> 1.8)
-  omniauth-rails_csrf_protection (~> 1.0)
+  omniauth-rails_csrf_protection (~> 2.0)
   pg (~> 1.5)
   propshaft
   puma (~> 7.2)
