@@ -63,12 +63,10 @@ namespace :geocode do
 
     response = http.request(request)
 
-    if response.code == "200"
-      data = JSON.parse(response.body)
-      format_address(data["address"]) if data["address"]
-    else
-      raise "HTTP #{response.code}: #{response.message}"
-    end
+    raise "HTTP #{response.code}: #{response.message}" unless response.code == "200"
+
+    data = JSON.parse(response.body)
+    format_address(data["address"]) if data["address"]
   end
 
   def format_address(addr)
@@ -96,4 +94,3 @@ namespace :geocode do
     parts.join(", ")
   end
 end
-

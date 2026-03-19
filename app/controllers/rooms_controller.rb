@@ -9,15 +9,13 @@ class RoomsController < ApplicationController
     @rooms = @map.rooms.order(:name)
   end
 
-  def show
-  end
+  def show; end
 
   def new
     @room = @map.rooms.build
   end
 
-  def edit
-  end
+  def edit; end
 
   def create
     @room = @map.rooms.build(room_params)
@@ -29,8 +27,8 @@ class RoomsController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: { errors: @room.errors.full_messages }, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: { errors: @room.errors.full_messages }, status: :unprocessable_content }
       end
     end
   end
@@ -43,8 +41,8 @@ class RoomsController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: { errors: @room.errors.full_messages }, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: { errors: @room.errors.full_messages }, status: :unprocessable_content }
       end
     end
   end
@@ -73,12 +71,12 @@ class RoomsController < ApplicationController
   end
 
   def room_params
-    params.require(:room).permit(:name, :x1, :y1, :x2, :y2)
+    params.expect(room: [:name, :x1, :y1, :x2, :y2])
   end
 
   def require_admin
-    unless current_user&.admin?
-      redirect_to root_path, alert: "You must be an admin to manage rooms."
-    end
+    return if current_user&.admin?
+
+    redirect_to root_path, alert: "You must be an admin to manage rooms."
   end
 end

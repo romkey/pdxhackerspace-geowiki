@@ -66,7 +66,7 @@ class Resource < ApplicationRecord
     if resource_locations.any?
       [resource_locations, nil]
     elsif parent
-      parent_locations, _ = parent.effective_resource_locations(user)
+      parent_locations, = parent.effective_resource_locations(user)
       [parent_locations, parent]
     else
       [[], nil]
@@ -79,7 +79,7 @@ class Resource < ApplicationRecord
     if resource_external_locations.any?
       [resource_external_locations, nil]
     elsif parent
-      parent_locations, _ = parent.effective_external_locations(user)
+      parent_locations, = parent.effective_external_locations(user)
       [parent_locations, parent]
     else
       [[], nil]
@@ -137,8 +137,7 @@ class Resource < ApplicationRecord
       urls: resource_urls.map { |u| { label: u.label, url: u.url } },
       locations: position_descriptions(include_distance: include_distance),
       view_count: view_count,
-      updated_at: updated_at.iso8601
+      updated_at: updated_at.iso8601,
     }
   end
 end
-

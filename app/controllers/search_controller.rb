@@ -29,4 +29,3 @@ class SearchController < ApplicationController
     @total_count = @internal_resources.count + @external_resources.count + @maps.count
   end
 end
-

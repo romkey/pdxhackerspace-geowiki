@@ -37,12 +37,12 @@ class ResourcesController < ApplicationController
 
   def export
     resources = Resource.internal.public_only
-                        .includes(:parent, :resource_urls, resource_locations: :map)
+      .includes(:parent, :resource_urls, resource_locations: :map)
 
     export_data = {
       generated_at: Time.current.iso8601,
       count: resources.count,
-      resources: resources.map { |r| r.to_export_hash(include_distance: true) }
+      resources: resources.map { |r| r.to_export_hash(include_distance: true) },
     }
 
     respond_to do |format|
@@ -105,7 +105,8 @@ class ResourcesController < ApplicationController
     permitted = [:name, :description, :internal, :parent_id, :icon,
                  { resource_urls_attributes: [:id, :url, :label, :_destroy],
                    resource_locations_attributes: [:id, :map_id, :x, :y, :_destroy],
-                   resource_external_locations_attributes: [:id, :latitude, :longitude, :url, :label, :address, :_destroy] }]
+                   resource_external_locations_attributes: [:id, :latitude, :longitude, :url, :label, :address,
+                                                            :_destroy,], },]
 
     # Only admins can set admin_only flag
     permitted << :admin_only if current_user&.admin?
@@ -158,4 +159,3 @@ class ResourcesController < ApplicationController
     @sort_direction == "desc" ? sorted.reverse : sorted
   end
 end
-

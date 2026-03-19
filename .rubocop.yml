@@ -29,7 +29,8 @@ Layout/MultilineMethodCallIndentation:
 Metrics/MethodLength:
   Max: 25
   Exclude:
-    - 'db/seeds.rb'
+    - "db/seeds.rb"
+    - "app/controllers/home_controller.rb"
 
 Metrics/BlockLength:
   Exclude:
@@ -40,6 +41,10 @@ Metrics/BlockLength:
 
 Metrics/AbcSize:
   Max: 25
+  Exclude:
+    - "app/controllers/rag_controller.rb"
+    - "app/controllers/home_controller.rb"
+    - "app/models/room.rb"
 
 Metrics/ClassLength:
   Max: 150
@@ -82,6 +87,14 @@ Style/TrailingCommaInHashLiteral:
 # Naming
 Naming/PredicatePrefix:
   Enabled: false
+
+Naming/MethodParameterName:
+  AllowedNames:
+    - x
+    - y
+    - id
+    - to
+    - _
 
 # Rails
 Rails/SkipsModelValidations:

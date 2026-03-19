@@ -18,8 +18,8 @@ gem "rails", "8.1.2"
 gem "stimulus-rails"
 gem "turbo-rails"
 
-gem "sentry-ruby"
 gem "sentry-rails"
+gem "sentry-ruby"
 gem "stackprof"
 
 group :development, :test do

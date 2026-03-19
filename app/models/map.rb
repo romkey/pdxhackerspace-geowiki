@@ -58,7 +58,7 @@ class Map < ApplicationRecord
   end
 
   def has_scale?
-    scale_pixels.present? && scale_real_value.present? && scale_pixels > 0
+    scale_pixels.present? && scale_real_value.present? && scale_pixels.positive?
   end
 
   def percent_to_real_distance(percent)

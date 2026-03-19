@@ -13,7 +13,7 @@ class RagController < ApplicationController
     export_data = {
       generated_at: Time.current.iso8601,
       count: resources.count,
-      resources: resources.map { |r| resource_to_rag(r) }
+      resources: resources.map { |r| resource_to_rag(r) },
     }
 
     render json: export_data
@@ -28,7 +28,7 @@ class RagController < ApplicationController
       description: resource.description,
       type: resource.internal? ? "internal" : "external",
       added_at: resource.created_at.iso8601,
-      updated_at: resource.updated_at.iso8601
+      updated_at: resource.updated_at.iso8601,
     }
 
     if resource.parent && !resource.parent.admin_only?
@@ -36,9 +36,7 @@ class RagController < ApplicationController
     end
 
     public_children = resource.children.where(admin_only: false)
-    if public_children.any?
-      base[:children] = public_children.map { |c| { id: c.id, name: c.name } }
-    end
+    base[:children] = public_children.map { |c| { id: c.id, name: c.name } } if public_children.any?
 
     if resource.resource_urls.any?
       base[:web_links] = resource.resource_urls.map do |url|
@@ -46,18 +44,18 @@ class RagController < ApplicationController
       end
     end
 
-    if resource.internal?
-      base[:locations] = resource.resource_locations.map { |loc| internal_location(loc) }
-    else
-      base[:locations] = resource.resource_external_locations.map { |loc| external_location(loc) }
-    end
+    base[:locations] = if resource.internal?
+                         resource.resource_locations.map { |loc| internal_location(loc) }
+                       else
+                         resource.resource_external_locations.map { |loc| external_location(loc) }
+                       end
 
     base
   end
 
   def internal_location(location)
     result = {
-      map: location.map.name
+      map: location.map.name,
     }
 
     room = location.room
@@ -74,7 +72,7 @@ class RagController < ApplicationController
         result[:position_in_room] = {
           x: rel_x_units&.round(1),
           y: rel_y_units&.round(1),
-          unit: location.map.scale_unit
+          unit: location.map.scale_unit,
         }
 
         result[:position_description] = location.position_description(include_distance: true)
@@ -93,8 +91,8 @@ class RagController < ApplicationController
     result = {
       coordinates: {
         latitude: location.latitude.to_f,
-        longitude: location.longitude.to_f
-      }
+        longitude: location.longitude.to_f,
+      },
     }
 
     result[:address] = location.address if location.address.present?

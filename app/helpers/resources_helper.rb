@@ -15,4 +15,3 @@ module ResourcesHelper
     "#{latitude}, #{longitude}"
   end
 end
-

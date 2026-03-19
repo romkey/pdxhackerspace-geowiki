@@ -5,7 +5,7 @@ class Room < ApplicationRecord
 
   validates :name, presence: true, uniqueness: { scope: :map_id }
   validates :x1, :y1, :x2, :y2, presence: true,
-            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+                                numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
 
   def left
     [x1, x2].min
@@ -40,7 +40,7 @@ class Room < ApplicationRecord
   end
 
   def contains_point?(x, y)
-    x >= left && x <= right && y >= top && y <= bottom
+    x.between?(left, right) && y >= top && y <= bottom
   end
 
   def position_description_for(x, y, include_distance: true)
@@ -53,19 +53,15 @@ class Room < ApplicationRecord
                    "west"
                  elsif relative_x > 0.67
                    "east"
-                 else
-                   nil
                  end
 
     vertical = if relative_y < 0.33
                  "north"
                elsif relative_y > 0.67
                  "south"
-               else
-                 nil
                end
 
-    position = [vertical, horizontal].compact.join("")
+    position = [vertical, horizontal].compact.join
     position = "center" if position.empty?
 
     base_description = "In #{name}, #{position_to_words(position)}"
@@ -87,7 +83,7 @@ class Room < ApplicationRecord
       north: y - top,
       south: bottom - y,
       west: x - left,
-      east: right - x
+      east: right - x,
     }
 
     nearest = distances.min_by { |_, d| d }

@@ -10,7 +10,7 @@ namespace :resources do
     export_data = {
       generated_at: Time.current.iso8601,
       count: resources.count,
-      resources: resources.map { |r| r.to_export_hash(include_distance: true) }
+      resources: resources.map { |r| r.to_export_hash(include_distance: true) },
     }
 
     File.write(output_path, JSON.pretty_generate(export_data))
@@ -22,12 +22,12 @@ namespace :resources do
     output_path = ENV.fetch("OUTPUT_PATH", "public/resources.json")
 
     resources = Resource.internal.where(admin_only: false)
-                        .includes(:parent, :resource_urls, resource_locations: :map)
+      .includes(:parent, :resource_urls, resource_locations: :map)
 
     export_data = {
       generated_at: Time.current.iso8601,
       count: resources.count,
-      resources: resources.map { |r| r.to_export_hash(include_distance: true) }
+      resources: resources.map { |r| r.to_export_hash(include_distance: true) },
     }
 
     File.write(output_path, JSON.pretty_generate(export_data))

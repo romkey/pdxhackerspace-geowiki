@@ -15,4 +15,3 @@ class ResourceLocation < ApplicationRecord
     map.position_description_for(x, y, include_distance: include_distance)
   end
 end
-
