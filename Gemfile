@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "~> 3.4.0"
+ruby "3.4.9"
 
 gem "active_storage_validations", "~> 3.0"
 gem "bcrypt", "~> 3.1"
