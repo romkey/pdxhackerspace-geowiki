@@ -15,7 +15,7 @@ jobs:
     
     steps:
       - name: Send email notification
-        uses: dawidd6/action-send-mail@v11
+        uses: dawidd6/action-send-mail@v16
         with:
           server_address: ${{ secrets.MAIL_SERVER }}
           server_port: ${{ secrets.MAIL_PORT }}
