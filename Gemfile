@@ -5,7 +5,7 @@ ruby "3.4.9"
 gem "active_storage_validations", "~> 3.0"
 gem "bcrypt", "~> 3.1"
 gem "bootsnap", ">= 1.4.4", require: false
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
 gem "importmap-rails"
 gem "jbuilder", "~> 2.13"
 gem "omniauth", "~> 2.1"
