@@ -63,11 +63,11 @@ class RoomsController < ApplicationController
   private
 
   def set_map
-    @map = Map.find(params[:map_id])
+    @map = Map.find(params.expect(:map_id))
   end
 
   def set_room
-    @room = @map.rooms.find(params[:id])
+    @room = @map.rooms.find(params.expect(:id))
   end
 
   def room_params

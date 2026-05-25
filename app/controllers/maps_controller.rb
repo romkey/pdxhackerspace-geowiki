@@ -45,7 +45,7 @@ class MapsController < ApplicationController
   end
 
   def image_url
-    @map = Map.find(params[:id])
+    @map = Map.find(params.expect(:id))
     if @map.image.attached?
       render json: { url: url_for(@map.image), name: @map.name }
     else
@@ -56,7 +56,7 @@ class MapsController < ApplicationController
   private
 
   def set_map
-    @map = Map.find(params[:id])
+    @map = Map.find(params.expect(:id))
   end
 
   def authorize_edit!
