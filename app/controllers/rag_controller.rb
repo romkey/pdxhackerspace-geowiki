@@ -61,6 +61,7 @@ class RagController < ApplicationController
     room = location.room
     if room
       result[:room] = room.name
+      result[:room_height_inches] = room.height.to_f if room.height.present?
 
       if location.map.has_scale?
         rel_x_percent = location.x - room.left
@@ -83,6 +84,8 @@ class RagController < ApplicationController
     else
       result[:position_percent] = { x: location.x.to_f.round(2), y: location.y.to_f.round(2) }
     end
+
+    result[:elevation_inches] = location.elevation.to_f if location.elevation.present?
 
     result
   end

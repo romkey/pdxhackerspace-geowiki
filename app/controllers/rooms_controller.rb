@@ -71,7 +71,7 @@ class RoomsController < ApplicationController
   end
 
   def room_params
-    params.expect(room: [:name, :x1, :y1, :x2, :y2])
+    params.expect(room: [:name, :x1, :y1, :x2, :y2, :height])
   end
 
   def require_admin

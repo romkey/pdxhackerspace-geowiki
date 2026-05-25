@@ -31,6 +31,7 @@ Metrics/MethodLength:
   Exclude:
     - "db/seeds.rb"
     - "app/controllers/home_controller.rb"
+    - "app/controllers/rag_controller.rb"
 
 Metrics/BlockLength:
   Exclude:

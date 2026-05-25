@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2024_12_14_000020) do
+ActiveRecord::Schema[8.1].define(version: 2024_12_14_000022) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,6 +96,7 @@ ActiveRecord::Schema[8.1].define(version: 2024_12_14_000020) do
 
   create_table "resource_locations", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.decimal "elevation", precision: 10, scale: 2
     t.bigint "map_id", null: false
     t.bigint "resource_id", null: false
     t.datetime "updated_at", null: false
@@ -136,6 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2024_12_14_000020) do
 
   create_table "rooms", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.decimal "height", precision: 10, scale: 2
     t.bigint "map_id", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false

@@ -12,6 +12,8 @@ class ResourceLocation < ApplicationRecord
   end
 
   def position_description(include_distance: true)
-    map.position_description_for(x, y, include_distance: include_distance)
+    desc = map.position_description_for(x, y, include_distance: include_distance)
+    desc += " at #{elevation.to_i}\" elevation" if elevation.present? && elevation.positive?
+    desc
   end
 end

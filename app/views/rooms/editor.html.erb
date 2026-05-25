@@ -99,6 +99,14 @@
               <label class="form-label">Room Name</label>
               <%= f.text_field :name, class: "form-control", id: "room-name", required: true, placeholder: "e.g., Workshop" %>
             </div>
+            <div class="mb-3">
+              <label class="form-label">Ceiling Height (inches)</label>
+              <div class="input-group">
+                <%= f.number_field :height, class: "form-control", id: "room-height", step: "0.1", min: "0", placeholder: "e.g., 120" %>
+                <span class="input-group-text">in</span>
+              </div>
+              <small class="text-muted">Optional: Room ceiling height for vertical positioning</small>
+            </div>
             <div class="row mb-3">
               <div class="col-6">
                 <label class="form-label">Corner 1</label>
@@ -151,6 +159,9 @@
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <strong><%= room.name %></strong>
+                  <% if room.height.present? %>
+                    <span class="badge bg-secondary ms-1"><%= room.height %>" ceiling</span>
+                  <% end %>
                   <br>
                   <small class="text-muted">
                     (<%= number_with_precision(room.left, precision: 1) %>%, <%= number_with_precision(room.top, precision: 1) %>%) to
