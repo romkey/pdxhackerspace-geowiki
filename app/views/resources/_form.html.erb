@@ -263,7 +263,7 @@
             <%= location_form.hidden_field :x, class: "location-x", data: { location_index: location_index } %>
             <%= location_form.hidden_field :y, class: "location-y", data: { location_index: location_index } %>
             <div class="input-group input-group-sm" style="width: 120px;">
-              <%= location_form.number_field :elevation, class: "form-control form-control-sm location-elevation", placeholder: "Height", step: "0.1", data: { location_index: location_index } %>
+              <%= location_form.number_field :elevation, class: "form-control form-control-sm location-elevation", placeholder: "Elevation", step: "0.1", data: { location_index: location_index } %>
               <span class="input-group-text">in</span>
             </div>
             <%= location_form.hidden_field :_destroy, class: "destroy-field", value: "false", data: { location_index: location_index } %>
@@ -702,7 +702,7 @@ function addInternalLocation(mapId, mapName, x, y) {
       <input type="hidden" name="resource[resource_locations_attributes][${safeIdx}][x]" class="location-x" value="${x.toFixed(3)}" data-location-index="${safeIdx}">
       <input type="hidden" name="resource[resource_locations_attributes][${safeIdx}][y]" class="location-y" value="${y.toFixed(3)}" data-location-index="${safeIdx}">
       <div class="input-group input-group-sm" style="width: 120px;">
-        <input type="number" name="resource[resource_locations_attributes][${safeIdx}][elevation]" class="form-control form-control-sm location-elevation" placeholder="Height" step="0.1" data-location-index="${safeIdx}">
+        <input type="number" name="resource[resource_locations_attributes][${safeIdx}][elevation]" class="form-control form-control-sm location-elevation" placeholder="Elevation" step="0.1" data-location-index="${safeIdx}">
         <span class="input-group-text">in</span>
       </div>
       <input type="hidden" name="resource[resource_locations_attributes][${safeIdx}][_destroy]" class="destroy-field" value="false" data-location-index="${safeIdx}">
