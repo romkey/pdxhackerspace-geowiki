@@ -7,7 +7,7 @@ gem "bcrypt", "~> 3.1"
 gem "bootsnap", ">= 1.4.4", require: false
 gem "image_processing", "~> 1.2"
 gem "importmap-rails"
-gem "jbuilder", "~> 2.13"
+gem "jbuilder", "~> 2.15"
 gem "omniauth", "~> 2.1"
 gem "omniauth-oauth2", "~> 1.8"
 gem "omniauth-rails_csrf_protection", "~> 2.0"
