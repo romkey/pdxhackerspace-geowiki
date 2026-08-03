@@ -1,13 +1,14 @@
 source "https://rubygems.org"
 
-ruby "3.4.9"
+ruby "4.0.6"
 
 gem "active_storage_validations", "~> 3.0"
 gem "bcrypt", "~> 3.1"
 gem "bootsnap", ">= 1.4.4", require: false
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
 gem "importmap-rails"
 gem "jbuilder", "~> 2.13"
+gem "mini_magick", "~> 5.0"
 gem "omniauth", "~> 2.1"
 gem "omniauth-oauth2", "~> 1.8"
 gem "omniauth-rails_csrf_protection", "~> 2.0"
