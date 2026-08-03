@@ -1,6 +1,6 @@
 # Geowiki
 
-A Rails 8.1.1 application with Ruby 3.4.7, Bootstrap 5.3.8, and PostgreSQL.
+A Rails 8.1 application with Ruby 4.0.6, Bootstrap 5.3.8, and PostgreSQL.
 
 ## Requirements
 
@@ -156,7 +156,7 @@ Resources can be placed on multiple maps with specific x,y coordinates. This all
 ## Technology Stack
 
 - Rails 8.1.1
-- Ruby 3.4.7
+- Ruby 4.0.6
 - Bootstrap 5.3.8
 - PostgreSQL
 - Docker & Docker Compose
