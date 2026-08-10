@@ -8,7 +8,7 @@ gem "bootsnap", ">= 1.4.4", require: false
 gem "image_processing", "~> 2.0"
 gem "importmap-rails"
 gem "jbuilder", "~> 2.13"
-gem "mini_magick", "~> 5.0"
+gem "mini_magick", "~> 5.3"
 gem "omniauth", "~> 2.1"
 gem "omniauth-oauth2", "~> 1.8"
 gem "omniauth-rails_csrf_protection", "~> 2.0"
