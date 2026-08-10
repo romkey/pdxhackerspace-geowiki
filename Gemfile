@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby "4.0.6"
 
-gem "active_storage_validations", "~> 3.0"
+gem "active_storage_validations", "~> 4.0"
 gem "bcrypt", "~> 3.1"
 gem "bootsnap", ">= 1.4.4", require: false
 gem "image_processing", "~> 2.0"
