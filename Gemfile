@@ -16,6 +16,8 @@ gem "pg", "~> 1.5"
 gem "propshaft"
 gem "puma", "~> 8.0"
 gem "rails", "~> 8.1"
+# json 3.x changed JSON.parse arity; ActiveSupport 8.1 session cookie decoding breaks with it
+gem "json", "~> 2.21"
 gem "stimulus-rails"
 gem "turbo-rails"
 
