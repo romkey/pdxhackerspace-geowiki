@@ -21,7 +21,7 @@ gem "json", "~> 2.21"
 gem "stimulus-rails"
 gem "turbo-rails"
 
-gem "sentry-rails", "~> 7.0"
+gem "sentry-rails", "~> 7.1"
 gem "sentry-ruby", "~> 7.0"
 gem "stackprof"
 
