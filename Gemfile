@@ -22,7 +22,7 @@ gem "stimulus-rails"
 gem "turbo-rails"
 
 gem "sentry-rails", "~> 7.0"
-gem "sentry-ruby", "~> 7.0"
+gem "sentry-ruby", "~> 7.1"
 gem "stackprof"
 
 group :development, :test do
