@@ -1,6 +1,8 @@
 # Geowiki
 
-A Rails 8.1 application with Ruby 4.0.6, Bootstrap 5.3.8, and PostgreSQL.
+A Rails 8.1 application with Ruby 4.0.9, Bootstrap 5.3.8, and PostgreSQL.
+
+This project is meant to run **only in Docker**. You do not need Ruby, Bundler, or PostgreSQL installed on your host. The Ruby version in the `Dockerfile`, `Gemfile`, and `.ruby-version` files keeps the image, Bundler, and CI in sync—not for local Ruby installs.
 
 ## Requirements
 
@@ -156,7 +158,7 @@ Resources can be placed on multiple maps with specific x,y coordinates. This all
 ## Technology Stack
 
 - Rails 8.1.1
-- Ruby 4.0.6
+- Ruby 4.0.9 (in Docker)
 - Bootstrap 5.3.8
 - PostgreSQL
 - Docker & Docker Compose

@@ -1,6 +1,17 @@
 #!/usr/bin/env ruby
 require "fileutils"
 
+abort <<~MSG unless ENV["DOCKER"] == "true" || File.exist?("/.dockerenv")
+
+  This app runs in Docker only. Use:
+
+    docker-compose up --build
+    docker-compose exec web rails db:create db:migrate
+
+  See README.md for other commands.
+
+MSG
+
 # path to your application root.
 APP_ROOT = File.expand_path("..", __dir__)
 
