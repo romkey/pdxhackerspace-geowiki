@@ -32,6 +32,23 @@ RSpec.describe "Authentication" do
 
       expect(response).to have_http_status(:unprocessable_content)
     end
+
+    it "stores a bcrypt digest for local admin credentials" do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with("LOCAL_ADMIN_EMAIL", nil).and_return("admin@example.com")
+      allow(ENV).to receive(:fetch).with("LOCAL_ADMIN_PASSWORD", nil).and_return("local-admin-secret")
+      allow(ENV).to receive(:fetch).with("LOCAL_ADMIN_NAME", "Local Admin").and_return("Local Admin")
+
+      post login_path,
+           params: { email: "admin@example.com", password: "local-admin-secret" },
+           headers: browser_headers
+
+      expect(response).to redirect_to(root_path)
+      user = User.find_by!(email: "admin@example.com")
+      expect(user).to be_admin
+      expect(user.password_digest).not_to eq("local-admin-secret")
+      expect(user.authenticate("local-admin-secret")).to eq(user)
+    end
   end
 
   describe "authenticated-only pages" do

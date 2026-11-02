@@ -7,8 +7,12 @@ class User < ApplicationRecord
   has_many :maintained_maps, through: :map_maintainers, source: :map
 
   validates :email, presence: true, uniqueness: true
-  validates :password, presence: true, if: -> { provider.blank? && password_digest.present? }
+  validates :password, presence: true, if: -> { provider.blank? && password_digest.blank? }
   validates :password_digest, presence: true, if: -> { provider.blank? }
+
+  def self.hash_password(unencrypted_password)
+    BCrypt::Password.create(unencrypted_password)
+  end
 
   def self.from_omniauth(auth)
     user = where(provider: auth.provider, uid: auth.uid).first_or_initialize
