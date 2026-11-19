@@ -17,8 +17,8 @@ RUN apt-get update -qq && \
 # Set working directory
 WORKDIR /app
 
-# Install bundler
-RUN gem install bundler
+# Install bundler (keep in sync with BUNDLED WITH in Gemfile.lock)
+RUN gem install bundler -v 4.1.0
 
 # Copy Gemfile and Gemfile.lock
 COPY Gemfile Gemfile.lock ./
