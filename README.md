@@ -1,6 +1,6 @@
 # Geowiki
 
-A Rails 8.1 application with Ruby 4.0.9, Bootstrap 5.3.8, and PostgreSQL.
+A Rails 8.1 application with Ruby 4.0.10, Bootstrap 5.3.9, and PostgreSQL.
 
 This project is meant to run **only in Docker**. You do not need Ruby, Bundler, or PostgreSQL installed on your host. The Ruby version in the `Dockerfile`, `Gemfile`, and `.ruby-version` files keeps the image, Bundler, and CI in sync—not for local Ruby installs.
 
@@ -53,7 +53,7 @@ docker-compose run --rm test
 ## Docker Services
 
 - **web**: Rails application server (port 3000)
-- **db**: PostgreSQL database (port 5432)
+- **db**: PostgreSQL 18 database (port 5432). The data volume is mounted at `/var/lib/postgresql`, which is where the official Postgres 18 image stores `/var/lib/postgresql/18/docker`. A volume created with the older `/var/lib/postgresql/data` mount will not start under this image; dump it, remove that volume, and restore into a new one.
 - **test**: Test runner service
 
 ## Deployment
@@ -157,9 +157,9 @@ Resources can be placed on multiple maps with specific x,y coordinates. This all
 
 ## Technology Stack
 
-- Rails 8.1.1
-- Ruby 4.0.9 (in Docker)
-- Bootstrap 5.3.8
+- Rails 8.1.4.1
+- Ruby 4.0.10 (in Docker)
+- Bootstrap 5.3.9
 - PostgreSQL
 - Docker & Docker Compose
 - OmniAuth with Authentik

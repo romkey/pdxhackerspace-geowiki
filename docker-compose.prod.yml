@@ -1,8 +1,10 @@
 services:
   db:
     image: postgres:18
+    # Postgres 18 keeps data in /var/lib/postgresql/18/docker. Mount the parent
+    # directory so the cluster is actually stored on this volume.
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     environment:
       POSTGRES_USER: ${DATABASE_USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD is required}
